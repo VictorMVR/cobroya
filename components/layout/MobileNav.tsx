@@ -43,9 +43,9 @@ const navItems: NavItem[] = [
     label: 'Productos',
   },
   {
-    href: '/menu',
-    icon: MoreHorizontal,
-    label: 'Más',
+    href: '/clientes',
+    icon: Users,
+    label: 'Clientes',
   },
 ]
 

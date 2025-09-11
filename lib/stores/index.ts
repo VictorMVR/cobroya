@@ -42,5 +42,14 @@ export {
   useToast,
 } from './toast.store'
 
+// Cliente store exports
+export {
+  useClienteStore,
+  useActiveClientes,
+  useClienteSearch,
+  useSelectedCliente,
+  useClienteMetrics,
+} from './cliente.store'
+
 // Re-export types for convenience
 export type * from '@/lib/types'

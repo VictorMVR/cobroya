@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { X, User, Receipt, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatCurrency } from '@/lib/utils/money'
-import { usePOSStore } from '@/lib/stores'
+import { usePOSStore, useToast } from '@/lib/stores'
 import type { Cliente } from '@/lib/types'
+import { ClienteSelector } from '@/components/clientes/ClienteSelector'
+import { ClienteForm } from '@/components/clientes/ClienteForm'
 
 interface SaveAccountModalProps {
   isOpen: boolean
@@ -20,30 +22,19 @@ export function SaveAccountModal({ isOpen, onClose, onSuccess }: SaveAccountModa
   // Determine if we're in edit mode
   const isEditMode = !!editingAccountId
   const defaultAccountName = isEditMode ? (editingAccountOriginal?.nombre || '') : ''
-  const [clienteName, setClienteName] = useState('')
-  const [clientePhone, setClientePhone] = useState('')
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
+  const [showClienteForm, setShowClienteForm] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const toast = useToast()
 
   const handleSave = async () => {
     if (!accountName.trim()) return
 
     setIsLoading(true)
     try {
-      // Create cliente object if provided
-      let cliente: Cliente | undefined = undefined
-      if (clienteName.trim()) {
-        cliente = {
-          id: crypto.randomUUID(),
-          nombre: clienteName.trim(),
-          telefono: clientePhone.trim() || undefined,
-          email: undefined,
-        }
-      }
-
-      // Update cart with cliente if provided
-      if (cliente) {
-        // This would ideally be handled by the store
-        currentCart.cliente = cliente
+      // Update cart with selected cliente if provided
+      if (selectedCliente) {
+        currentCart.cliente = selectedCliente
       }
 
       // Save or update the account based on mode
@@ -65,10 +56,23 @@ export function SaveAccountModal({ isOpen, onClose, onSuccess }: SaveAccountModa
 
   const handleClose = () => {
     setAccountName('')
-    setClienteName('')
-    setClientePhone('')
+    setSelectedCliente(null)
+    setShowClienteForm(false)
     setIsLoading(false)
     onClose()
+  }
+
+  const handleCreateNewCliente = () => {
+    setShowClienteForm(true)
+  }
+
+  const handleClienteFormSuccess = (message: string) => {
+    setShowClienteForm(false)
+    toast.success(message)
+  }
+
+  const handleClienteFormCancel = () => {
+    setShowClienteForm(false)
   }
 
   // Set default values when modal opens in edit mode
@@ -76,14 +80,12 @@ export function SaveAccountModal({ isOpen, onClose, onSuccess }: SaveAccountModa
     if (isOpen && isEditMode) {
       setAccountName(defaultAccountName)
       if (editingAccountOriginal?.cliente) {
-        setClienteName(editingAccountOriginal.cliente.nombre)
-        setClientePhone(editingAccountOriginal.cliente.telefono || '')
+        setSelectedCliente(editingAccountOriginal.cliente)
       }
     } else if (isOpen && !isEditMode) {
       // Reset for new account mode
       setAccountName('')
-      setClienteName('')
-      setClientePhone('')
+      setSelectedCliente(null)
     }
   }, [isOpen, isEditMode, defaultAccountName, editingAccountOriginal])
 
@@ -154,37 +156,33 @@ export function SaveAccountModal({ isOpen, onClose, onSuccess }: SaveAccountModa
               </h3>
             </div>
             
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">
-                Nombre del Cliente
-              </label>
-              <input
-                type="text"
-                value={clienteName}
-                onChange={(e) => setClienteName(e.target.value)}
-                className="input-no-zoom w-full px-3 py-2 border border-border rounded-lg 
-                           focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent
-                           placeholder:text-muted-foreground"
-                placeholder="Juan Pérez"
-                disabled={isLoading}
-              />
-            </div>
+            <ClienteSelector
+              value={selectedCliente}
+              onChange={setSelectedCliente}
+              placeholder="Seleccionar cliente..."
+              disabled={isLoading}
+              onCreateNew={handleCreateNewCliente}
+            />
 
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">
-                Teléfono
-              </label>
-              <input
-                type="tel"
-                value={clientePhone}
-                onChange={(e) => setClientePhone(e.target.value)}
-                className="input-no-zoom w-full px-3 py-2 border border-border rounded-lg 
-                           focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent
-                           placeholder:text-muted-foreground"
-                placeholder="555-1234"
-                disabled={isLoading}
-              />
-            </div>
+            {/* Show selected client details */}
+            {selectedCliente && (
+              <div className="bg-secondary/30 border border-border rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <User className="h-4 w-4 text-primary" />
+                  <span className="font-medium text-foreground">{selectedCliente.nombre}</span>
+                </div>
+                {selectedCliente.telefono && (
+                  <div className="text-sm text-muted-foreground">
+                    📞 {selectedCliente.telefono}
+                  </div>
+                )}
+                {selectedCliente.email && (
+                  <div className="text-sm text-muted-foreground">
+                    ✉️ {selectedCliente.email}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -223,6 +221,14 @@ export function SaveAccountModal({ isOpen, onClose, onSuccess }: SaveAccountModa
           </button>
         </div>
       </div>
+
+      {/* ClienteForm Modal */}
+      {showClienteForm && (
+        <ClienteForm
+          onSuccess={handleClienteFormSuccess}
+          onCancel={handleClienteFormCancel}
+        />
+      )}
     </div>
   )
 }
