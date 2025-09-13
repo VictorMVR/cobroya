@@ -54,6 +54,9 @@ export default function LandingPage() {
                 <a href="#pricing" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition">
                   Precios
                 </a>
+                <Link href="/login" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition">
+                  Iniciar Sesión
+                </Link>
                 <Link href="/pos" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
                   Probar Gratis
                 </Link>
@@ -79,6 +82,9 @@ export default function LandingPage() {
               <a href="#features" className="block px-3 py-2 text-gray-600 hover:text-blue-600">Características</a>
               <a href="#business" className="block px-3 py-2 text-gray-600 hover:text-blue-600">Negocios</a>
               <a href="#pricing" className="block px-3 py-2 text-gray-600 hover:text-blue-600">Precios</a>
+              <Link href="/login" className="block px-3 py-2 text-gray-600 hover:text-blue-600 border border-gray-300 rounded-lg font-medium mb-2">
+                Iniciar Sesión
+              </Link>
               <Link href="/pos" className="block px-3 py-2 bg-blue-600 text-white rounded-lg font-medium">
                 Probar Gratis
               </Link>
@@ -109,6 +115,15 @@ export default function LandingPage() {
               <button className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors">
                 Ver Demo
               </button>
+            </div>
+
+            <div className="text-center mb-8">
+              <p className="text-gray-600">
+                ¿Ya tienes cuenta? 
+                <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium ml-1">
+                  Iniciar sesión aquí
+                </Link>
+              </p>
             </div>
 
             {/* Hero Stats */}
@@ -389,8 +404,17 @@ export default function LandingPage() {
               >
                 Empezar Ahora <ArrowRight className="h-5 w-5" />
               </Link>
-              <button className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
-                Hablar con Ventas
+              <Link 
+                href="/login"
+                className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
+              >
+                Iniciar Sesión
+              </Link>
+            </div>
+
+            <div className="text-center mb-4">
+              <button className="text-white/80 hover:text-white text-sm underline transition-colors">
+                ¿Necesitas ayuda? Hablar con Ventas
               </button>
             </div>
 
