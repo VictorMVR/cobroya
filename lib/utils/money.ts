@@ -107,8 +107,12 @@ export class Money {
 /**
  * Format number as Mexican Peso currency
  */
-export function formatCurrency(amount: number | string | Money): string {
+export function formatCurrency(amount: number | string | Money | null | undefined): string {
+  if (amount == null) return '$0.00'
+  
   const value = amount instanceof Money ? amount.toNumber() : Number(amount)
+  
+  if (isNaN(value)) return '$0.00'
   
   return new Intl.NumberFormat(CURRENCY_CONFIG.locale, {
     style: 'currency',

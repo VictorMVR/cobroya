@@ -91,7 +91,7 @@ export function PaymentModal({ cuenta, onClose, onPaymentComplete }: PaymentModa
           </div>
           <h2 className="text-xl font-semibold text-foreground mb-2">¡Pago Exitoso!</h2>
           <p className="text-muted-foreground mb-4">
-            La cuenta "{cuenta.nombre}" ha sido pagada correctamente
+            La cuenta &quot;{cuenta.nombre}&quot; ha sido pagada correctamente
           </p>
           <div className="text-2xl font-bold text-success">
             {formatCurrency(cuenta.total)}

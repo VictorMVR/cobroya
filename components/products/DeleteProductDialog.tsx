@@ -51,7 +51,7 @@ export function DeleteProductDialog({ product, onConfirm, onCancel }: DeleteProd
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Precio:</span>
                 <span className="font-medium text-primary">
-                  {formatCurrency(product.precio)}
+                  {formatCurrency(product.precio_venta)}
                 </span>
               </div>
               <div className="flex justify-between">

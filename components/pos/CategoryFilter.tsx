@@ -1,23 +1,54 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useUIStore } from '@/lib/stores'
 import { cn } from '@/lib/utils'
-import { Filter, X } from 'lucide-react'
-
-// Mock categories - estas vendrían de la base de datos
-const categories = [
-  { id: '1', nombre: 'Bebidas', color: '#3B82F6' },
-  { id: '2', nombre: 'Snacks', color: '#F59E0B' },
-  { id: '3', nombre: 'Dulces', color: '#EF4444' },
-  { id: '4', nombre: 'Cigarros', color: '#6B7280' },
-  { id: '5', nombre: 'Medicinas', color: '#10B981' },
-  { id: '6', nombre: 'Limpieza', color: '#8B5CF6' },
-  { id: '7', nombre: 'Papelería', color: '#F97316' },
-  { id: '8', nombre: 'Otros', color: '#6366F1' },
-]
+import { Filter, X, Loader2 } from 'lucide-react'
+import type { Categoria } from '@/lib/types'
 
 export function CategoryFilter() {
   const { selectedCategory, setSelectedCategory } = useUIStore()
+  const [categories, setCategories] = useState<Categoria[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Load categories from API
+  const loadCategories = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/categorias')
+      const result = await response.json()
+      
+      if (response.ok) {
+        setCategories(result.data || [])
+      } else {
+        console.error('Error loading categories:', result.error)
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Load categories on component mount
+  useEffect(() => {
+    loadCategories()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 pb-2">
+        <div className="flex items-center gap-1 text-muted-foreground flex-shrink-0">
+          <Filter className="h-4 w-4" />
+          <span className="text-sm font-medium">Categorías:</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Cargando...</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2">
@@ -53,7 +84,7 @@ export function CategoryFilter() {
               : 'bg-background text-foreground border-border hover:bg-secondary'
           )}
           style={{
-            backgroundColor: selectedCategory === category.id ? category.color : undefined,
+            backgroundColor: selectedCategory === category.id ? (category.color || '#6B7280') : undefined,
           }}
         >
           {category.nombre}

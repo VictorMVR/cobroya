@@ -11,7 +11,8 @@ import {
   Settings,
   BarChart3,
   X,
-  ChevronLeft
+  ChevronLeft,
+  Tag
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -81,6 +82,12 @@ const navigationSections: NavSection[] = [
         icon: Package,
         label: 'Productos',
         description: 'Catálogo de productos',
+      },
+      {
+        href: '/categorias',
+        icon: Tag,
+        label: 'Categorías',
+        description: 'Gestionar categorías',
       },
       {
         href: '/inventario',

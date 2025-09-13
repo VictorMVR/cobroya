@@ -14,7 +14,7 @@ interface UIState {
   
   // Search functionality
   searchQuery: string
-  searchResults: any[]
+  searchResults: unknown[]
   
   // Category filter
   selectedCategory: string | null
@@ -24,7 +24,7 @@ interface UIState {
   
   // Modal state
   activeModal: string | null
-  modalData: any
+  modalData: unknown
   
   // Theme
   theme: 'light' | 'dark' | 'system'
@@ -49,7 +49,7 @@ interface UIState {
   
   // Actions - Search
   setSearchQuery: (query: string) => void
-  setSearchResults: (results: any[]) => void
+  setSearchResults: (results: unknown[]) => void
   clearSearch: () => void
   
   // Actions - Category
@@ -61,7 +61,7 @@ interface UIState {
   clearNotifications: () => void
   
   // Actions - Modal
-  openModal: (modalId: string, data?: any) => void
+  openModal: (modalId: string, data?: unknown) => void
   closeModal: () => void
   
   // Actions - Theme
@@ -124,7 +124,7 @@ export const useUIStore = create<UIState>((set, get) => ({
     set({ searchQuery: query })
   },
 
-  setSearchResults: (results: any[]) => {
+  setSearchResults: (results: unknown[]) => {
     set({ searchResults: results })
   },
 
@@ -169,7 +169,7 @@ export const useUIStore = create<UIState>((set, get) => ({
   },
 
   // Modal actions
-  openModal: (modalId: string, data?: any) => {
+  openModal: (modalId: string, data?: unknown) => {
     set({ activeModal: modalId, modalData: data })
   },
 

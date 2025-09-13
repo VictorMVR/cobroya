@@ -1,0 +1,1 @@
+ALTER TABLE productos ADD COLUMN aplica_iva BOOLEAN DEFAULT true;

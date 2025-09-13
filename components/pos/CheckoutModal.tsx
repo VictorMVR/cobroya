@@ -81,6 +81,8 @@ export function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutModalProps
       }, 2000)
     } catch (error) {
       console.error('Payment processing error:', error)
+      // Show error message to user
+      alert(error instanceof Error ? error.message : 'Error al procesar el pago')
     } finally {
       setIsProcessing(false)
     }

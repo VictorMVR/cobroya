@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Search, User, Phone, Plus, Check, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useActiveClientes } from '@/lib/stores'
+import { useClienteStore } from '@/lib/stores'
 import type { Cliente } from '@/lib/types'
 
 interface ClienteSelectorProps {
@@ -23,11 +23,20 @@ export function ClienteSelector({
   onCreateNew,
   className
 }: ClienteSelectorProps) {
-  const activeClientes = useActiveClientes()
+  const { clientes, loadClientes, getActiveClientes, isLoading } = useClienteStore()
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Load clientes when component mounts
+  useEffect(() => {
+    if (clientes.length === 0) {
+      loadClientes()
+    }
+  }, [clientes.length, loadClientes])
+
+  const activeClientes = useMemo(() => getActiveClientes(), [clientes])
 
   // Filter clients based on search
   const filteredClientes = useMemo(() => {

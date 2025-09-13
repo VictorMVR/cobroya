@@ -1,36 +1,28 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, User, Save, Phone, Mail, MapPin, FileText } from 'lucide-react'
+import { X, User, Save, Phone, Mail } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useClienteStore } from '@/lib/stores'
 import type { Cliente } from '@/lib/types'
 
 interface ClienteFormProps {
   cliente?: Cliente | null
-  onSuccess: (message: string) => void
+  onSave: (clienteData: Omit<Cliente, 'id' | 'created_at' | 'updated_at'>) => void
   onCancel: () => void
+  isSubmitting?: boolean
 }
 
 interface FormData {
   nombre: string
   telefono: string
   email: string
-  direccion: string
-  rfc: string
-  activo: boolean
 }
 
-export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) {
-  const { createCliente, updateCliente } = useClienteStore()
-  const [isLoading, setIsLoading] = useState(false)
+export function ClienteForm({ cliente, onSave, onCancel, isSubmitting = false }: ClienteFormProps) {
   const [formData, setFormData] = useState<FormData>({
     nombre: '',
     telefono: '',
     email: '',
-    direccion: '',
-    rfc: '',
-    activo: true,
   })
   
   const [errors, setErrors] = useState<Partial<FormData>>({})
@@ -44,9 +36,6 @@ export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) 
         nombre: cliente.nombre,
         telefono: cliente.telefono || '',
         email: cliente.email || '',
-        direccion: cliente.direccion || '',
-        rfc: cliente.rfc || '',
-        activo: cliente.activo,
       })
     }
   }, [cliente])
@@ -70,9 +59,6 @@ export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) 
       newErrors.telefono = 'Formato de teléfono inválido (ej: 555-1234)'
     }
 
-    if (formData.rfc && !isValidRFC(formData.rfc)) {
-      newErrors.rfc = 'Formato de RFC inválido'
-    }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -89,11 +75,6 @@ export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) 
     return phoneRegex.test(phone)
   }
 
-  const isValidRFC = (rfc: string): boolean => {
-    // Mexican RFC format: 4 letters + 6 digits + 3 alphanumeric (ABCD123456789)
-    const rfcRegex = /^[A-Z]{4}\d{6}[A-Z0-9]{3}$/i
-    return rfcRegex.test(rfc)
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -102,40 +83,27 @@ export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) 
       return
     }
 
-    setIsLoading(true)
-
     try {
       // Clean up form data
       const cleanData = {
+        tenant_id: null, // Will be set by the API based on authentication
         nombre: formData.nombre.trim(),
-        telefono: formData.telefono.trim() || undefined,
-        email: formData.email.trim() || undefined,
-        direccion: formData.direccion.trim() || undefined,
-        rfc: formData.rfc.trim().toUpperCase() || undefined,
-        activo: formData.activo,
+        telefono: formData.telefono.trim() || null,
+        email: formData.email.trim() || null,
+        credito_limite: null,
+        credito_usado: null,
       }
 
-      if (isEditing && cliente) {
-        updateCliente(cliente.id, cleanData)
-        onSuccess('Cliente actualizado correctamente')
-      } else {
-        createCliente(cleanData)
-        onSuccess('Cliente creado correctamente')
-      }
+      onSave(cleanData)
     } catch (error) {
       console.error('Error saving client:', error)
-      // Error handling could show error toast here
-    } finally {
-      setIsLoading(false)
     }
   }
 
   const handleInputChange = (field: keyof FormData) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const value = e.target.type === 'checkbox' 
-      ? (e.target as HTMLInputElement).checked
-      : e.target.value
+    const value = e.target.value
 
     setFormData(prev => ({
       ...prev,
@@ -171,7 +139,7 @@ export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) 
           <button
             onClick={onCancel}
             className="p-2 hover:bg-secondary rounded-lg transition-colors"
-            disabled={isLoading}
+            disabled={isSubmitting}
           >
             <X className="h-4 w-4" />
           </button>
@@ -198,7 +166,7 @@ export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) 
                     errors.nombre ? 'border-destructive' : 'border-border'
                   )}
                   placeholder="Juan Pérez García"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                   autoFocus
                   required
                 />
@@ -226,7 +194,7 @@ export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) 
                     errors.telefono ? 'border-destructive' : 'border-border'
                   )}
                   placeholder="555-1234"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                 />
               </div>
               {errors.telefono && (
@@ -252,7 +220,7 @@ export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) 
                     errors.email ? 'border-destructive' : 'border-border'
                   )}
                   placeholder="cliente@email.com"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                 />
               </div>
               {errors.email && (
@@ -260,81 +228,6 @@ export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) 
               )}
             </div>
 
-            {/* Dirección */}
-            <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">
-                Dirección
-              </label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <textarea
-                  value={formData.direccion}
-                  onChange={handleInputChange('direccion')}
-                  rows={2}
-                  className={cn(
-                    'input-no-zoom w-full pl-10 pr-4 py-2 border rounded-lg resize-none',
-                    'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-                    'placeholder:text-muted-foreground',
-                    errors.direccion ? 'border-destructive' : 'border-border'
-                  )}
-                  placeholder="Av. Revolución 123, Col. Centro"
-                  disabled={isLoading}
-                />
-              </div>
-              {errors.direccion && (
-                <p className="text-xs text-destructive mt-1">{errors.direccion}</p>
-              )}
-            </div>
-
-            {/* RFC */}
-            <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">
-                RFC
-              </label>
-              <div className="relative">
-                <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  value={formData.rfc}
-                  onChange={handleInputChange('rfc')}
-                  className={cn(
-                    'input-no-zoom w-full pl-10 pr-4 py-2 border rounded-lg font-mono',
-                    'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-                    'placeholder:text-muted-foreground uppercase',
-                    errors.rfc ? 'border-destructive' : 'border-border'
-                  )}
-                  placeholder="ABCD123456789"
-                  disabled={isLoading}
-                  maxLength={13}
-                  style={{ textTransform: 'uppercase' }}
-                />
-              </div>
-              {errors.rfc && (
-                <p className="text-xs text-destructive mt-1">{errors.rfc}</p>
-              )}
-              <p className="text-xs text-muted-foreground mt-1">
-                Formato: 4 letras + 6 dígitos + 3 caracteres
-              </p>
-            </div>
-
-            {/* Estado */}
-            <div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.activo}
-                  onChange={handleInputChange('activo')}
-                  className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
-                  disabled={isLoading}
-                />
-                <span className="text-sm font-medium text-foreground">
-                  Cliente activo
-                </span>
-              </label>
-              <p className="text-xs text-muted-foreground mt-1">
-                Los clientes inactivos no aparecerán en las búsquedas del POS
-              </p>
-            </div>
           </div>
         </form>
 
@@ -344,7 +237,7 @@ export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) 
             type="button"
             onClick={onCancel}
             className="btn-touch px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors"
-            disabled={isLoading}
+            disabled={isSubmitting}
           >
             Cancelar
           </button>
@@ -352,7 +245,7 @@ export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) 
           <button
             type="submit"
             onClick={handleSubmit}
-            disabled={isLoading || !formData.nombre.trim()}
+            disabled={isSubmitting || !formData.nombre.trim()}
             className={cn(
               'btn-touch px-6 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium',
               'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -361,7 +254,7 @@ export function ClienteForm({ cliente, onSuccess, onCancel }: ClienteFormProps) 
                 : 'bg-muted text-muted-foreground'
             )}
           >
-            {isLoading ? (
+            {isSubmitting ? (
               <>
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 {isEditing ? 'Actualizando...' : 'Guardando...'}

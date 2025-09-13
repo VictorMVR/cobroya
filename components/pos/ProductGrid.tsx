@@ -101,7 +101,7 @@ function ProductCard({ producto, onAdd }: ProductCardProps) {
 
         <div className="flex items-center justify-between">
           <div className="text-lg font-bold text-primary">
-            {formatCurrency(producto.precio)}
+            {formatCurrency(producto.precio_venta)}
           </div>
           
           <button
@@ -148,7 +148,7 @@ function ProductListItem({ producto, onAdd }: ProductCardProps) {
           {producto.codigo} • Stock: {producto.stock}
         </p>
         <div className="text-lg font-bold text-primary mt-1">
-          {formatCurrency(producto.precio)}
+          {formatCurrency(producto.precio_venta)}
         </div>
       </div>
 

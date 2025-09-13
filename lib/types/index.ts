@@ -24,25 +24,27 @@ export interface Tenant extends BaseEntity {
   activo: boolean
 }
 
-// Product and inventory types
+// Product and inventory types - ACTUALIZADO para coincidir con BD real
 export interface Producto extends BaseEntity {
-  tenant_id: string
-  codigo: string
+  tenant_id: string | null
+  categoria_id: string | null
+  codigo_barras: string | null
+  codigo_interno: string | null
   nombre: string
-  descripcion?: string
-  precio: number
-  stock: number
-  categoria_id?: string
-  imagen_url?: string
-  activo: boolean
+  descripcion: string | null
+  precio_venta: number
+  imagen_url: string | null
+  es_paquete: boolean | null
+  cantidad_paquete: number | null
+  activo: boolean | null
+  aplica_iva: boolean | null
 }
 
 export interface Categoria extends BaseEntity {
-  tenant_id: string
+  tenant_id: string | null
   nombre: string
-  descripcion?: string
-  color?: string
-  activo: boolean
+  orden: number | null
+  color: string | null
 }
 
 // Sales and transaction types
@@ -69,13 +71,12 @@ export interface VentaDetalle extends BaseEntity {
 }
 
 export interface Cliente extends BaseEntity {
-  tenant_id: string
+  tenant_id: string | null
   nombre: string
-  email?: string
-  telefono?: string
-  direccion?: string
-  rfc?: string
-  activo: boolean
+  email: string | null
+  telefono: string | null
+  credito_limite: number | null
+  credito_usado: number | null
 }
 
 // Cart and POS types
@@ -99,15 +100,31 @@ export interface Cart {
 
 export interface Cuenta {
   id: string
-  nombre: string
-  cliente?: Cliente
-  items: CartItem[]
-  subtotal: number
-  descuento: number
-  impuestos: number
-  total: number
+  cliente_id: string | null
+  cliente_nombre: string | null
+  sucursal_id: string | null
+  usuario_id: string | null
+  estatus_id: string | null
+  total: number | null
   created_at: string
-  estado: 'abierta' | 'pagada' | 'cancelada'
+  closed_at: string | null
+  items_cuenta?: ItemCuenta[]
+}
+
+export interface ItemCuenta {
+  id: string
+  cuenta_id: string | null
+  producto_id: string | null
+  cantidad: number | null
+  precio_unit: number
+  subtotal: number
+  created_at: string | null
+  productos?: {
+    id: string
+    nombre: string
+    codigo_interno: string | null
+    precio_venta: number
+  }
 }
 
 // Payment types

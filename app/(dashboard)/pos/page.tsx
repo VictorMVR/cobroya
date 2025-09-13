@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { Search, Filter, Grid, List, Plus, Edit, X, CheckCircle } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Search, Filter, Grid, List, Plus, Edit, X, CheckCircle, Loader2 } from 'lucide-react'
 import { usePOSStore, useUIStore, useDeviceInfo } from '@/lib/stores'
 import { cn } from '@/lib/utils'
 import { ProductGrid } from '@/components/pos/ProductGrid'
@@ -13,9 +13,34 @@ import { CartSheet } from '@/components/pos/CartSheet'
 export default function POSPage() {
   const { isMobile } = useDeviceInfo()
   const { selectedCategory } = useUIStore()
-  const { productos, currentCart, editingAccountId, editingAccountOriginal, cancelAccountEditing, cuentasAbiertas } = usePOSStore()
+  const { productos, setProductos, currentCart, editingAccountId, editingAccountOriginal, cancelAccountEditing, cuentasAbiertas } = usePOSStore()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchQuery, setSearchQuery] = useState('')
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true)
+
+  // Load products from API
+  const loadProducts = async () => {
+    try {
+      setIsLoadingProducts(true)
+      const response = await fetch('/api/productos')
+      const result = await response.json()
+      
+      if (response.ok) {
+        setProductos(result.data || [])
+      } else {
+        console.error('Error loading products:', result.error)
+      }
+    } catch (error) {
+      console.error('Error loading products:', error)
+    } finally {
+      setIsLoadingProducts(false)
+    }
+  }
+
+  // Load products on component mount
+  useEffect(() => {
+    loadProducts()
+  }, [])
 
   // Filter products based on search and category
   const filteredProducts = useMemo(() => {
@@ -27,7 +52,8 @@ export default function POSPage() {
       filtered = filtered.filter(
         p => 
           p.nombre.toLowerCase().includes(query) ||
-          p.codigo.toLowerCase().includes(query) ||
+          p.codigo_interno?.toLowerCase().includes(query) ||
+          p.codigo_barras?.toLowerCase().includes(query) ||
           p.descripcion?.toLowerCase().includes(query)
       )
     }
@@ -37,8 +63,8 @@ export default function POSPage() {
       filtered = filtered.filter(p => p.categoria_id === selectedCategory)
     }
 
-    // Only show active products
-    return filtered.filter(p => p.activo && p.stock > 0)
+    // Only show active products (inventory check temporarily disabled)
+    return filtered.filter(p => p.activo !== false)
   }, [productos, searchQuery, selectedCategory])
 
   // Get the account being edited
@@ -60,7 +86,7 @@ export default function POSPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium text-foreground text-sm">
-                    Editando Cuenta: {editingAccount.nombre}
+                    Editando Cuenta: {editingAccount.cliente_nombre || 'Sin cliente'}
                   </h3>
                   <p className="text-xs text-muted-foreground">
                     Los cambios se guardarán automáticamente al procesar pago o guardar cuenta
@@ -124,10 +150,22 @@ export default function POSPage() {
 
         {/* Product Grid/List */}
         <div className="flex-1 overflow-auto p-4">
-          <ProductGrid 
-            products={filteredProducts}
-            viewMode={viewMode}
-          />
+          {isLoadingProducts ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Loader2 className="h-16 w-16 text-muted-foreground mb-4 animate-spin" />
+              <h3 className="text-lg font-medium text-foreground mb-2">
+                Cargando productos...
+              </h3>
+              <p className="text-muted-foreground">
+                Por favor espera mientras cargamos el catálogo desde la base de datos
+              </p>
+            </div>
+          ) : (
+            <ProductGrid 
+              products={filteredProducts}
+              viewMode={viewMode}
+            />
+          )}
         </div>
       </div>
 

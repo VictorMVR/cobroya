@@ -81,309 +81,10 @@ export const usePOSStore = create<POSState>()(
         notas: undefined,
       },
       
-      cuentasAbiertas: [
-        {
-          id: 'cuenta-1',
-          nombre: 'Mesa 5',
-          items: [
-            {
-              producto: {
-                id: '1',
-                nombre: 'Coca-Cola 600ml',
-                codigo: 'COCA-600',
-                precio: 25.00,
-                categoria: 'bebidas',
-                activo: true,
-                cantidad_stock: 50,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-              cantidad: 2,
-              precio_unitario: 25.00,
-              subtotal: 50.00,
-            },
-            {
-              producto: {
-                id: '2',
-                nombre: 'Sabritas Original 45g',
-                codigo: 'SAB-ORIG-45',
-                precio: 18.00,
-                categoria: 'snacks',
-                activo: true,
-                cantidad_stock: 30,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-              cantidad: 1,
-              precio_unitario: 18.00,
-              subtotal: 18.00,
-            }
-          ],
-          subtotal: 68.00,
-          descuento: 0,
-          impuestos: 10.88,
-          total: 78.88,
-          estado: 'abierta',
-          cliente: {
-            id: 'cliente-1',
-            nombre: 'Juan Pérez',
-            telefono: '555-1234',
-            email: 'juan@example.com',
-          },
-          created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: 'cuenta-2',
-          nombre: 'Fiado - María García',
-          items: [
-            {
-              producto: {
-                id: '3',
-                nombre: 'Leche Lala 1L',
-                codigo: 'LALA-1L',
-                precio: 32.00,
-                categoria: 'lacteos',
-                activo: true,
-                cantidad_stock: 20,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-              cantidad: 3,
-              precio_unitario: 32.00,
-              subtotal: 96.00,
-            },
-            {
-              producto: {
-                id: '4',
-                nombre: 'Pan Bimbo Blanco',
-                codigo: 'BIMBO-BLANCO',
-                precio: 35.00,
-                categoria: 'panaderia',
-                activo: true,
-                cantidad_stock: 15,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-              cantidad: 2,
-              precio_unitario: 35.00,
-              subtotal: 70.00,
-            }
-          ],
-          subtotal: 166.00,
-          descuento: 10.00,
-          impuestos: 24.96,
-          total: 180.96,
-          estado: 'abierta',
-          cliente: {
-            id: 'cliente-2',
-            nombre: 'María García',
-            telefono: '555-5678',
-            email: 'maria@example.com',
-          },
-          created_at: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(), // 26 hours ago (old account)
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: 'cuenta-3',
-          nombre: 'Mesa 12 - Cumpleaños',
-          items: [
-            {
-              producto: {
-                id: '5',
-                nombre: 'Cerveza Corona 355ml',
-                codigo: 'CORONA-355',
-                precio: 45.00,
-                categoria: 'bebidas',
-                activo: true,
-                cantidad_stock: 24,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-              cantidad: 6,
-              precio_unitario: 45.00,
-              subtotal: 270.00,
-            },
-            {
-              producto: {
-                id: '6',
-                nombre: 'Nachos con Queso',
-                codigo: 'NACHOS-QUESO',
-                precio: 65.00,
-                categoria: 'snacks',
-                activo: true,
-                cantidad_stock: 12,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-              cantidad: 2,
-              precio_unitario: 65.00,
-              subtotal: 130.00,
-            }
-          ],
-          subtotal: 400.00,
-          descuento: 0,
-          impuestos: 64.00,
-          total: 464.00,
-          estado: 'abierta',
-          created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
-          updated_at: new Date().toISOString(),
-        }
-      ],
+      cuentasAbiertas: [],
       editingAccountId: null,
       editingAccountOriginal: null,
-      productos: [
-        {
-          id: '1',
-          nombre: 'Coca-Cola 600ml',
-          codigo: 'COCA-600',
-          descripcion: 'Refresco de cola 600ml',
-          precio: 25.00,
-          categoria: 'bebidas',
-          categoria_id: 'bebidas',
-          activo: true,
-          stock: 50,
-          cantidad_stock: 50,
-          costo: 18.00,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          nombre: 'Sabritas Original 45g',
-          codigo: 'SAB-ORIG-45',
-          descripcion: 'Papas fritas sabor original',
-          precio: 18.00,
-          categoria: 'snacks',
-          categoria_id: 'snacks',
-          activo: true,
-          stock: 30,
-          cantidad_stock: 30,
-          costo: 12.50,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '3',
-          nombre: 'Leche Lala 1L',
-          codigo: 'LALA-1L',
-          descripcion: 'Leche entera 1 litro',
-          precio: 32.00,
-          categoria: 'lacteos',
-          categoria_id: 'lacteos',
-          activo: true,
-          stock: 20,
-          cantidad_stock: 20,
-          costo: 24.00,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '4',
-          nombre: 'Pan Bimbo Blanco',
-          codigo: 'BIMBO-BLANCO',
-          descripcion: 'Pan de caja blanco grande',
-          precio: 35.00,
-          categoria: 'panaderia',
-          categoria_id: 'panaderia',
-          activo: true,
-          stock: 15,
-          cantidad_stock: 15,
-          costo: 28.00,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '5',
-          nombre: 'Cerveza Corona 355ml',
-          codigo: 'CORONA-355',
-          descripcion: 'Cerveza clara 355ml',
-          precio: 45.00,
-          categoria: 'bebidas',
-          categoria_id: 'bebidas',
-          activo: true,
-          stock: 24,
-          cantidad_stock: 24,
-          costo: 32.00,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '6',
-          nombre: 'Galletas Oreo',
-          codigo: 'OREO-ORIGINAL',
-          descripcion: 'Galletas Oreo paquete familiar',
-          precio: 28.00,
-          categoria: 'snacks',
-          categoria_id: 'snacks',
-          activo: true,
-          stock: 18,
-          cantidad_stock: 18,
-          costo: 20.00,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '7',
-          nombre: 'Agua Bonafont 1.5L',
-          codigo: 'BONAFONT-1.5L',
-          descripcion: 'Agua purificada 1.5 litros',
-          precio: 15.00,
-          categoria: 'bebidas',
-          categoria_id: 'bebidas',
-          activo: true,
-          stock: 40,
-          cantidad_stock: 40,
-          costo: 8.50,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '8',
-          nombre: 'Yogurt Danone Fresa',
-          codigo: 'DANONE-FRESA',
-          descripcion: 'Yogurt bebible sabor fresa 1L',
-          precio: 38.00,
-          categoria: 'lacteos',
-          categoria_id: 'lacteos',
-          activo: true,
-          stock: 12,
-          cantidad_stock: 12,
-          costo: 28.50,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '9',
-          nombre: 'Aceite Capullo 1L',
-          codigo: 'CAPULLO-1L',
-          descripcion: 'Aceite vegetal comestible 1L',
-          precio: 48.00,
-          categoria: 'despensa',
-          categoria_id: 'despensa',
-          activo: true,
-          stock: 8,
-          cantidad_stock: 8,
-          costo: 38.00,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '10',
-          nombre: 'Huevos San Juan 12 pzas',
-          codigo: 'HUEVO-12',
-          descripcion: 'Huevos frescos carton de 12',
-          precio: 42.00,
-          categoria: 'despensa',
-          categoria_id: 'despensa',
-          activo: true,
-          stock: 25,
-          cantidad_stock: 25,
-          costo: 32.00,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-      ],
+      productos: [],
       lastProductsSync: null,
       selectedCliente: null,
 
@@ -405,7 +106,7 @@ export const usePOSStore = create<POSState>()(
               ? { 
                   ...item, 
                   cantidad: item.cantidad + cantidad,
-                  subtotal: (item.cantidad + cantidad) * item.precio_unitario
+                  subtotal: (item.cantidad + cantidad) * (item.precio_unitario || 0)
                 }
               : item
           )
@@ -414,8 +115,8 @@ export const usePOSStore = create<POSState>()(
           const newItem: CartItem = {
             producto,
             cantidad,
-            precio_unitario: producto.precio,
-            subtotal: cantidad * producto.precio,
+            precio_unitario: producto.precio_venta || 0,
+            subtotal: cantidad * (producto.precio_venta || 0),
           }
           newItems = [...currentCart.items, newItem]
         }
@@ -444,7 +145,7 @@ export const usePOSStore = create<POSState>()(
             ? { 
                 ...item, 
                 cantidad,
-                subtotal: cantidad * item.precio_unitario
+                subtotal: cantidad * (item.precio_unitario || 0)
               }
             : item
         )
@@ -527,30 +228,73 @@ export const usePOSStore = create<POSState>()(
       },
 
       // Account Management
-      saveCartAsAccount: (nombre: string) => {
-        const { currentCart, cuentasAbiertas } = get()
+      saveCartAsAccount: async (nombre: string) => {
+        const { currentCart } = get()
         
         if (currentCart.items.length === 0) return
         
-        const newAccount: Cuenta = {
-          id: crypto.randomUUID(),
-          nombre,
-          cliente: currentCart.cliente,
-          items: [...currentCart.items],
-          subtotal: currentCart.subtotal,
-          descuento: currentCart.descuento,
-          impuestos: currentCart.impuestos,
-          total: currentCart.total,
-          created_at: new Date().toISOString(),
-          estado: 'abierta',
+        try {
+          // Create account via API
+          const accountData = {
+            cliente_id: currentCart.cliente?.id || null,
+            cliente_nombre: nombre,
+            total: currentCart.total,
+          }
+
+          const response = await fetch('/api/cuentas', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(accountData),
+          })
+
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || 'Error al crear la cuenta')
+          }
+
+          const { data: cuenta } = await response.json()
+
+          // Add items to the account
+          const itemsData = {
+            items: currentCart.items.map(item => ({
+              producto_id: item.producto.id,
+              cantidad: item.cantidad,
+              precio_unit: item.precio_unitario,
+            }))
+          }
+
+          await fetch(`/api/cuentas/${cuenta.id}/items`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(itemsData),
+          })
+
+          // Update local state
+          set((state) => ({
+            cuentasAbiertas: [...state.cuentasAbiertas, {
+              id: cuenta.id,
+              nombre: cuenta.cliente_nombre,
+              cliente: currentCart.cliente,
+              items: [...currentCart.items],
+              subtotal: currentCart.subtotal,
+              descuento: currentCart.descuento,
+              impuestos: currentCart.impuestos,
+              total: currentCart.total,
+              created_at: cuenta.created_at,
+              estado: 'abierta',
+            }]
+          }))
+        
+          // Clear cart after saving
+          get().clearCart()
+        } catch (error) {
+          console.error('Error saving account:', error)
+          throw error
         }
-        
-        set({ 
-          cuentasAbiertas: [...cuentasAbiertas, newAccount] 
-        })
-        
-        // Clear cart after saving
-        get().clearCart()
       },
 
       loadAccount: (accountId: string) => {
@@ -754,7 +498,7 @@ export const usePOSStore = create<POSState>()(
 
       // Payment Processing
       processPayment: async (payments: Payment[]): Promise<string> => {
-        const { currentCart } = get()
+        const { currentCart, editingAccountId } = get()
         
         if (currentCart.items.length === 0) {
           throw new Error('El carrito está vacío')
@@ -768,24 +512,55 @@ export const usePOSStore = create<POSState>()(
         }
         
         try {
-          // TODO: Implement actual payment processing with Supabase
-          console.log('Processing payment:', { 
-            cart: currentCart, 
-            payments, 
-            totalPaid, 
-            cartTotal 
+          // Prepare sale data for API
+          const saleData = {
+            cliente_id: currentCart.cliente?.id || null,
+            cuenta_id: editingAccountId || null,
+            total: cartTotal,
+            items: currentCart.items.map(item => ({
+              producto_id: item.producto.id,
+              cantidad: item.cantidad,
+              precio_unit: item.precio_unitario,
+            }))
+          }
+
+          // Call API to create sale
+          const response = await fetch('/api/ventas', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(saleData),
           })
+
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || 'Error al procesar la venta')
+          }
+
+          const { data: venta } = await response.json()
           
-          // Mock successful payment
-          const saleId = crypto.randomUUID()
+          // If we were editing an account, close it
+          if (editingAccountId) {
+            await fetch(`/api/cuentas/${editingAccountId}`, {
+              method: 'DELETE',
+            })
+            
+            // Update local state
+            set((state) => ({
+              cuentasAbiertas: state.cuentasAbiertas.filter(cuenta => cuenta.id !== editingAccountId),
+              editingAccountId: null,
+              editingAccountOriginal: null,
+            }))
+          }
           
           // Clear cart after successful payment
           get().clearCart()
           
-          return saleId
+          return venta.id
         } catch (error) {
           console.error('Payment processing error:', error)
-          throw new Error('Error al procesar el pago')
+          throw error instanceof Error ? error : new Error('Error al procesar el pago')
         }
       },
 
@@ -817,16 +592,24 @@ export const usePOSStore = create<POSState>()(
       getCartSubtotal: () => {
         const { currentCart } = get()
         const subtotal = currentCart.items.reduce(
-          (sum, item) => sum + item.subtotal, 
+          (sum, item) => sum + (item.subtotal || 0), 
           0
         )
-        return new Money(subtotal)
+        return new Money(subtotal || 0)
       },
 
       getCartTax: () => {
-        const subtotal = get().getCartSubtotal()
-        const discount = new Money(get().currentCart.descuento)
-        const taxableAmount = subtotal.subtract(discount)
+        const { currentCart } = get()
+        
+        // Calculate tax only on items that apply IVA
+        const taxableSubtotal = currentCart.items.reduce((sum, item) => {
+          const itemSubtotal = item.subtotal || 0
+          const aplicaIVA = item.producto.aplica_iva ?? true // Default true if field doesn't exist
+          return sum + (aplicaIVA ? itemSubtotal : 0)
+        }, 0)
+        
+        const discount = new Money(currentCart.descuento)
+        const taxableAmount = new Money(taxableSubtotal).subtract(discount)
         return calculateTax(taxableAmount, TAX_RATE * 100)
       },
 
@@ -879,146 +662,4 @@ export const useCartTotal = () => usePOSStore((state) => state.getCartTotal())
 export const useCuentasAbiertas = () => usePOSStore((state) => state.cuentasAbiertas)
 export const useProductos = () => usePOSStore((state) => state.productos)
 
-// Initialize with sample products for development
-if (typeof window !== 'undefined') {
-  const sampleProducts: Producto[] = [
-    {
-      id: '1',
-      tenant_id: 'demo',
-      codigo: 'COC001',
-      nombre: 'Coca-Cola 600ml',
-      descripcion: 'Refresco de cola 600ml',
-      precio: 18.50,
-      stock: 48,
-      categoria_id: '1',
-      activo: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      tenant_id: 'demo',
-      codigo: 'SAB001',
-      nombre: 'Sabritas Clásicas',
-      descripcion: 'Papas fritas sabor natural 45g',
-      precio: 15.00,
-      stock: 36,
-      categoria_id: '2',
-      activo: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '3',
-      tenant_id: 'demo',
-      codigo: 'CHI001',
-      nombre: 'Chicles Trident',
-      descripcion: 'Chicles sabor menta 12 piezas',
-      precio: 8.50,
-      stock: 24,
-      categoria_id: '3',
-      activo: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '4',
-      tenant_id: 'demo',
-      codigo: 'MAR001',
-      nombre: 'Marlboro Rojos',
-      descripcion: 'Cigarrillos Marlboro cajetilla',
-      precio: 75.00,
-      stock: 12,
-      categoria_id: '4',
-      activo: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '5',
-      tenant_id: 'demo',
-      codigo: 'PEP001',
-      nombre: 'Pepsi 600ml',
-      descripcion: 'Refresco de cola Pepsi 600ml',
-      precio: 17.00,
-      stock: 32,
-      categoria_id: '1',
-      activo: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '6',
-      tenant_id: 'demo',
-      codigo: 'DOR001',
-      nombre: 'Doritos Nacho',
-      descripcion: 'Tortillas de maíz sabor nacho 62g',
-      precio: 19.50,
-      stock: 28,
-      categoria_id: '2',
-      activo: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '7',
-      tenant_id: 'demo',
-      codigo: 'GAT001',
-      nombre: 'Gatorade Azul',
-      descripcion: 'Bebida deportiva sabor azul 500ml',
-      precio: 22.00,
-      stock: 20,
-      categoria_id: '1',
-      activo: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '8',
-      tenant_id: 'demo',
-      codigo: 'CAR001',
-      nombre: 'Carlos V',
-      descripcion: 'Chocolate con cacahuate 40g',
-      precio: 12.00,
-      stock: 45,
-      categoria_id: '3',
-      activo: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '9',
-      tenant_id: 'demo',
-      codigo: 'AGU001',
-      nombre: 'Agua Ciel 600ml',
-      descripcion: 'Agua purificada 600ml',
-      precio: 12.50,
-      stock: 60,
-      categoria_id: '1',
-      activo: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '10',
-      tenant_id: 'demo',
-      codigo: 'CHE001',
-      nombre: 'Cheetos Poffs',
-      descripcion: 'Fritura de maíz con queso 42g',
-      precio: 16.00,
-      stock: 22,
-      categoria_id: '2',
-      activo: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-  ]
-
-  // Initialize products if store is empty
-  setTimeout(() => {
-    const currentProducts = usePOSStore.getState().productos
-    if (currentProducts.length === 0) {
-      usePOSStore.getState().setProductos(sampleProducts)
-    }
-  }, 100)
-}
+// Products will be loaded from API instead of hardcoded initialization

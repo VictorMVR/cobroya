@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MoreVertical, User, Phone, Mail, MapPin, FileText, Edit2, Trash2, UserCheck, UserX, Calendar } from 'lucide-react'
+import { MoreVertical, Phone, Mail, Edit2, Trash2, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Cliente } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
@@ -11,10 +11,9 @@ interface ClienteCardProps {
   cliente: Cliente
   onEdit: () => void
   onDelete: () => void
-  onToggleStatus: () => void
 }
 
-export function ClienteCard({ cliente, onEdit, onDelete, onToggleStatus }: ClienteCardProps) {
+export function ClienteCard({ cliente, onEdit, onDelete }: ClienteCardProps) {
   const [showMenu, setShowMenu] = useState(false)
 
   // Generate initials from name
@@ -60,10 +59,7 @@ export function ClienteCard({ cliente, onEdit, onDelete, onToggleStatus }: Clien
   }
 
   return (
-    <div className={cn(
-      'bg-card border border-border rounded-lg p-4 space-y-4 transition-all hover:shadow-md',
-      !cliente.activo && 'opacity-60 bg-muted/20'
-    )}>
+    <div className="bg-card border border-border rounded-lg p-4 space-y-4 transition-all hover:shadow-md">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3 flex-1">
@@ -77,17 +73,11 @@ export function ClienteCard({ cliente, onEdit, onDelete, onToggleStatus }: Clien
           
           {/* Basic Info */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-foreground truncate">
-                {cliente.nombre}
-              </h3>
-              <div className={cn(
-                'w-2 h-2 rounded-full',
-                cliente.activo ? 'bg-success' : 'bg-muted-foreground'
-              )} />
-            </div>
+            <h3 className="font-semibold text-foreground truncate">
+              {cliente.nombre}
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Cliente {cliente.activo ? 'activo' : 'inactivo'}
+              Cliente registrado
             </p>
           </div>
         </div>
@@ -120,26 +110,6 @@ export function ClienteCard({ cliente, onEdit, onDelete, onToggleStatus }: Clien
                 >
                   <Edit2 className="h-4 w-4" />
                   Editar Cliente
-                </button>
-                
-                <button
-                  onClick={() => {
-                    onToggleStatus()
-                    setShowMenu(false)
-                  }}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-secondary flex items-center gap-2"
-                >
-                  {cliente.activo ? (
-                    <>
-                      <UserX className="h-4 w-4" />
-                      Desactivar
-                    </>
-                  ) : (
-                    <>
-                      <UserCheck className="h-4 w-4" />
-                      Reactivar
-                    </>
-                  )}
                 </button>
                 
                 <div className="border-t border-border my-1" />
@@ -185,24 +155,6 @@ export function ClienteCard({ cliente, onEdit, onDelete, onToggleStatus }: Clien
             </a>
           </div>
         )}
-        
-        {cliente.direccion && (
-          <div className="flex items-start gap-2 text-sm">
-            <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
-            <span className="text-muted-foreground text-xs leading-relaxed">
-              {cliente.direccion}
-            </span>
-          </div>
-        )}
-        
-        {cliente.rfc && (
-          <div className="flex items-center gap-2 text-sm">
-            <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <span className="text-muted-foreground font-mono text-xs">
-              {cliente.rfc}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Footer */}
@@ -212,13 +164,8 @@ export function ClienteCard({ cliente, onEdit, onDelete, onToggleStatus }: Clien
           <span>Creado {formatRelativeTime(cliente.created_at)}</span>
         </div>
         
-        <div className={cn(
-          'px-2 py-1 rounded-full text-xs font-medium',
-          cliente.activo 
-            ? 'bg-success/10 text-success'
-            : 'bg-muted text-muted-foreground'
-        )}>
-          {cliente.activo ? 'Activo' : 'Inactivo'}
+        <div className="px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+          Cliente
         </div>
       </div>
     </div>

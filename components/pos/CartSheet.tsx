@@ -6,6 +6,7 @@ import { usePOSStore, useSheet, useToast } from '@/lib/stores'
 import { formatCurrency } from '@/lib/utils/money'
 import { X, ShoppingCart, CreditCard, Minus, Plus, Trash2, Receipt } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { CartItem } from '@/lib/types'
 import { SaveAccountModal } from './SaveAccountModal'
 import { CheckoutModal } from './CheckoutModal'
 import { SelectExistingAccountModal } from './SelectExistingAccountModal'
@@ -249,7 +250,7 @@ export function CartSheet() {
 }
 
 interface CartSheetItemProps {
-  item: any // CartItem type
+  item: CartItem
   onUpdateQuantity: (quantity: number) => void
   onRemove: () => void
 }
@@ -265,7 +266,7 @@ function CartSheetItem({ item, onUpdateQuantity, onRemove }: CartSheetItemProps)
           {producto.nombre}
         </h3>
         <p className="text-xs text-muted-foreground">
-          {formatCurrency(producto.precio)} c/u
+          {formatCurrency(producto.precio_venta)} c/u
         </p>
         <p className="text-sm font-bold text-primary mt-1">
           {formatCurrency(item.subtotal)}

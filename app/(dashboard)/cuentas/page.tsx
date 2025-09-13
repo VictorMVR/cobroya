@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { Search, Receipt, Clock, DollarSign, AlertCircle, Eye, CreditCard, X, Plus } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Search, Receipt, Clock, DollarSign, AlertCircle, Eye, CreditCard, X, Plus, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { usePOSStore, useDeviceInfo } from '@/lib/stores'
 import { cn } from '@/lib/utils'
@@ -22,30 +22,56 @@ export default function CuentasPage() {
   const [selectedCuenta, setSelectedCuenta] = useState<Cuenta | null>(null)
   const [showDetail, setShowDetail] = useState(false)
   const [showPayment, setShowPayment] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [realCuentas, setRealCuentas] = useState<Cuenta[]>([])
+
+  // Load cuentas from API
+  const loadCuentas = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/cuentas')
+      const result = await response.json()
+      
+      if (response.ok) {
+        setRealCuentas(result.data || [])
+      } else {
+        console.error('Error loading cuentas:', result.error)
+      }
+    } catch (error) {
+      console.error('Error loading cuentas:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Load cuentas on component mount
+  useEffect(() => {
+    loadCuentas()
+  }, [])
 
   // Filter accounts based on search
   const filteredCuentas = useMemo(() => {
-    let filtered = cuentasAbiertas
+    let filtered = realCuentas
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(cuenta => 
-        cuenta.nombre.toLowerCase().includes(query) ||
-        cuenta.cliente?.nombre.toLowerCase().includes(query) ||
+      filtered = filtered.filter((cuenta) => 
+        cuenta.cliente_nombre?.toLowerCase().includes(query) ||
         cuenta.id.toLowerCase().includes(query)
       )
     }
 
     // Sort by creation date (newest first)
     return filtered.sort((a, b) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
     )
-  }, [cuentasAbiertas, searchQuery])
+  }, [realCuentas, searchQuery])
 
   // Calculate metrics
-  const totalCuentas = cuentasAbiertas.length
-  const montoTotal = cuentasAbiertas.reduce((sum, cuenta) => sum + cuenta.total, 0)
-  const cuentasViejas = cuentasAbiertas.filter(cuenta => {
+  const totalCuentas = realCuentas.length
+  const montoTotal = realCuentas.reduce((sum: number, cuenta) => sum + (cuenta.total || 0), 0)
+  const cuentasViejas = realCuentas.filter((cuenta) => {
+    if (!cuenta.created_at) return false
     const hoursSinceCreated = (Date.now() - new Date(cuenta.created_at).getTime()) / (1000 * 60 * 60)
     return hoursSinceCreated > 24
   }).length
@@ -67,15 +93,32 @@ export default function CuentasPage() {
     setShowPayment(true)
   }
 
-  const handleCancelAccount = (cuenta: Cuenta) => {
-    if (confirm(`¿Estás seguro de que deseas cancelar la cuenta "${cuenta.nombre}"?`)) {
-      deleteAccount(cuenta.id)
+  const handleCancelAccount = async (cuenta: Cuenta) => {
+    if (confirm(`¿Estás seguro de que deseas cancelar la cuenta "${cuenta.cliente_nombre}"?`)) {
+      try {
+        const response = await fetch(`/api/cuentas/${cuenta.id}`, {
+          method: 'DELETE',
+        })
+
+        if (response.ok) {
+          // Remove from local state
+          setRealCuentas(prev => prev.filter(c => c.id !== cuenta.id))
+          // Also remove from POS store if exists
+          deleteAccount(cuenta.id)
+        } else {
+          const errorData = await response.json()
+          alert('Error al cancelar la cuenta: ' + (errorData.error || 'Error desconocido'))
+        }
+      } catch (error) {
+        console.error('Error canceling account:', error)
+        alert('Error al cancelar la cuenta')
+      }
     }
   }
 
-  const handlePaymentComplete = (cuenta: Cuenta) => {
-    // Remove the account from open accounts after payment
-    deleteAccount(cuenta.id)
+  const handlePaymentComplete = async (cuenta: Cuenta) => {
+    // Remove the account from both local state and API
+    await handleCancelAccount(cuenta)
     setShowPayment(false)
     setSelectedCuenta(null)
   }
@@ -146,7 +189,17 @@ export default function CuentasPage() {
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-4">
-        {filteredCuentas.length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Loader2 className="h-16 w-16 text-muted-foreground mb-4 animate-spin" />
+            <h3 className="text-lg font-medium text-foreground mb-2">
+              Cargando cuentas...
+            </h3>
+            <p className="text-muted-foreground">
+              Por favor espera mientras cargamos las cuentas desde la base de datos
+            </p>
+          </div>
+        ) : filteredCuentas.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Receipt className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium text-foreground mb-2">

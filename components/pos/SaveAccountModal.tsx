@@ -39,9 +39,9 @@ export function SaveAccountModal({ isOpen, onClose, onSuccess }: SaveAccountModa
 
       // Save or update the account based on mode
       if (isEditMode) {
-        updateExistingAccount(accountName.trim())
+        await updateExistingAccount(accountName.trim())
       } else {
-        saveCartAsAccount(accountName.trim())
+        await saveCartAsAccount(accountName.trim())
       }
 
       // Show success and close
@@ -49,6 +49,8 @@ export function SaveAccountModal({ isOpen, onClose, onSuccess }: SaveAccountModa
       handleClose()
     } catch (error) {
       console.error('Error saving account:', error)
+      // Show error message to user
+      toast.error(error instanceof Error ? error.message : 'Error al guardar la cuenta')
     } finally {
       setIsLoading(false)
     }

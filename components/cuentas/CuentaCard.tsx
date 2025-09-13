@@ -24,7 +24,7 @@ export function CuentaCard({
 }: CuentaCardProps) {
   const hoursSinceCreated = (Date.now() - new Date(cuenta.created_at).getTime()) / (1000 * 60 * 60)
   const isOldAccount = hoursSinceCreated > 24
-  const itemCount = cuenta.items.reduce((sum, item) => sum + item.cantidad, 0)
+  const itemCount = (cuenta.items_cuenta || []).reduce((sum, item) => sum + (item.cantidad || 0), 0)
 
   return (
     <div className={cn(
@@ -36,13 +36,13 @@ export function CuentaCard({
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-foreground truncate">
-              {cuenta.nombre}
+              {cuenta.cliente_nombre || `Cuenta ${cuenta.id.slice(-8)}`}
             </h3>
             
-            {cuenta.cliente && (
+            {cuenta.cliente_id && (
               <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
                 <User className="h-3 w-3" />
-                <span className="truncate">{cuenta.cliente.nombre}</span>
+                <span className="truncate">Cliente: {cuenta.cliente_id}</span>
               </div>
             )}
             
@@ -62,7 +62,7 @@ export function CuentaCard({
 
           <div className="text-right ml-3">
             <div className="text-xl font-bold text-primary">
-              {formatCurrency(cuenta.total)}
+              {formatCurrency(cuenta.total || 0)}
             </div>
             <div className="text-xs text-muted-foreground">
               {itemCount} producto{itemCount !== 1 ? 's' : ''}
@@ -77,10 +77,10 @@ export function CuentaCard({
         <div className="space-y-2 mb-4">
           <h4 className="text-sm font-medium text-muted-foreground">Productos:</h4>
           <div className="space-y-1">
-            {cuenta.items.slice(0, 3).map((item, index) => (
+            {(cuenta.items_cuenta || []).slice(0, 3).map((item, index) => (
               <div key={index} className="flex items-center justify-between text-sm">
                 <span className="text-foreground truncate flex-1">
-                  {item.cantidad}x {item.producto.nombre}
+                  {item.cantidad || 0}x {item.productos?.nombre || `Producto ${item.producto_id?.slice(-8) || 'N/A'}`}
                 </span>
                 <span className="text-muted-foreground ml-2">
                   {formatCurrency(item.subtotal)}
@@ -88,9 +88,9 @@ export function CuentaCard({
               </div>
             ))}
             
-            {cuenta.items.length > 3 && (
+            {(cuenta.items_cuenta || []).length > 3 && (
               <div className="text-xs text-muted-foreground">
-                +{cuenta.items.length - 3} producto{cuenta.items.length - 3 !== 1 ? 's' : ''} más
+                +{(cuenta.items_cuenta || []).length - 3} producto{(cuenta.items_cuenta || []).length - 3 !== 1 ? 's' : ''} más
               </div>
             )}
           </div>
@@ -100,19 +100,23 @@ export function CuentaCard({
         <div className="space-y-1 text-sm border-t border-border pt-3 mb-4">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Subtotal:</span>
-            <span>{formatCurrency(cuenta.subtotal)}</span>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            <span>{formatCurrency((cuenta as any).subtotal || cuenta.total)}</span>
           </div>
           
-          {cuenta.descuento > 0 && (
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          {(cuenta as any).descuento > 0 && (
             <div className="flex justify-between text-success">
               <span>Descuento:</span>
-              <span>-{formatCurrency(cuenta.descuento)}</span>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <span>-{formatCurrency((cuenta as any).descuento)}</span>
             </div>
           )}
           
           <div className="flex justify-between">
             <span className="text-muted-foreground">Impuestos:</span>
-            <span>{formatCurrency(cuenta.impuestos)}</span>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            <span>{formatCurrency((cuenta as any).impuestos || 0)}</span>
           </div>
           
           <div className="flex justify-between font-semibold border-t border-border pt-1">

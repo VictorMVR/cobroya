@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Save, Package, DollarSign, Hash, Type, FileText, Tag, Eye, EyeOff } from 'lucide-react'
+import { X, Save, Package, DollarSign, Hash, Type, FileText, Tag, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { Producto } from '@/lib/types'
+import type { Producto, Categoria } from '@/lib/types'
 
 interface ProductFormProps {
   product?: Producto | null
@@ -11,47 +11,62 @@ interface ProductFormProps {
   onCancel: () => void
 }
 
-// Mock categories - estas vendrían de la base de datos
-const categories = [
-  { id: '1', nombre: 'Bebidas', color: '#3B82F6' },
-  { id: '2', nombre: 'Snacks', color: '#F59E0B' },
-  { id: '3', nombre: 'Dulces', color: '#EF4444' },
-  { id: '4', nombre: 'Cigarros', color: '#6B7280' },
-  { id: '5', nombre: 'Medicinas', color: '#10B981' },
-  { id: '6', nombre: 'Limpieza', color: '#8B5CF6' },
-  { id: '7', nombre: 'Papelería', color: '#F97316' },
-  { id: '8', nombre: 'Otros', color: '#6366F1' },
-]
-
 export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
   const [formData, setFormData] = useState({
-    tenant_id: 'demo',
-    codigo: '',
+    tenant_id: '',
+    codigo_interno: '',
+    codigo_barras: '',
     nombre: '',
     descripcion: '',
-    precio: '',
-    stock: '',
+    precio_venta: '',
     categoria_id: '',
     imagen_url: '',
+    es_paquete: false,
+    cantidad_paquete: '1',
     activo: true,
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [categories, setCategories] = useState<Categoria[]>([])
+  const [loadingCategories, setLoadingCategories] = useState(true)
+
+  // Load categories from API
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/categorias')
+        const result = await response.json()
+        if (response.ok) {
+          setCategories(result.data || [])
+        } else {
+          console.error('Error loading categories:', result.error)
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error)
+      } finally {
+        setLoadingCategories(false)
+      }
+    }
+
+    loadCategories()
+  }, [])
 
   // Initialize form with product data if editing
   useEffect(() => {
     if (product) {
       setFormData({
-        tenant_id: product.tenant_id,
-        codigo: product.codigo,
+        tenant_id: product.tenant_id || '',
+        codigo_interno: product.codigo_interno || '',
+        codigo_barras: product.codigo_barras || '',
         nombre: product.nombre,
         descripcion: product.descripcion || '',
-        precio: product.precio.toString(),
-        stock: product.stock.toString(),
+        precio_venta: product.precio_venta.toString(),
         categoria_id: product.categoria_id || '',
         imagen_url: product.imagen_url || '',
-        activo: product.activo,
+        es_paquete: product.es_paquete || false,
+        cantidad_paquete: (product.cantidad_paquete || 1).toString(),
+        activo: product.activo !== false,
       })
     }
   }, [product])
@@ -59,29 +74,23 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.codigo.trim()) {
-      newErrors.codigo = 'El código es requerido'
-    }
-
     if (!formData.nombre.trim()) {
       newErrors.nombre = 'El nombre es requerido'
     }
 
-    if (!formData.precio.trim()) {
-      newErrors.precio = 'El precio es requerido'
+    if (!formData.precio_venta.trim()) {
+      newErrors.precio_venta = 'El precio de venta es requerido'
     } else {
-      const precio = parseFloat(formData.precio)
+      const precio = parseFloat(formData.precio_venta)
       if (isNaN(precio) || precio < 0) {
-        newErrors.precio = 'El precio debe ser un número válido mayor o igual a 0'
+        newErrors.precio_venta = 'El precio debe ser un número válido mayor o igual a 0'
       }
     }
 
-    if (!formData.stock.trim()) {
-      newErrors.stock = 'El stock es requerido'
-    } else {
-      const stock = parseInt(formData.stock)
-      if (isNaN(stock) || stock < 0) {
-        newErrors.stock = 'El stock debe ser un número entero mayor o igual a 0'
+    if (formData.es_paquete && formData.cantidad_paquete) {
+      const cantidad = parseInt(formData.cantidad_paquete)
+      if (isNaN(cantidad) || cantidad < 1) {
+        newErrors.cantidad_paquete = 'La cantidad del paquete debe ser mayor a 0'
       }
     }
 
@@ -100,14 +109,16 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
 
     try {
       const productData = {
-        tenant_id: formData.tenant_id,
-        codigo: formData.codigo.trim(),
+        tenant_id: formData.tenant_id || null,
+        codigo_interno: formData.codigo_interno.trim() || null,
+        codigo_barras: formData.codigo_barras.trim() || null,
         nombre: formData.nombre.trim(),
-        descripcion: formData.descripcion.trim() || undefined,
-        precio: parseFloat(formData.precio),
-        stock: parseInt(formData.stock),
-        categoria_id: formData.categoria_id || undefined,
-        imagen_url: formData.imagen_url.trim() || undefined,
+        descripcion: formData.descripcion.trim() || null,
+        precio_venta: parseFloat(formData.precio_venta),
+        categoria_id: formData.categoria_id || null,
+        imagen_url: formData.imagen_url.trim() || null,
+        es_paquete: formData.es_paquete,
+        cantidad_paquete: formData.es_paquete ? parseInt(formData.cantidad_paquete) : 1,
         activo: formData.activo,
       }
 
@@ -155,53 +166,62 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Código */}
+                {/* Código Interno */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
                     <Hash className="h-4 w-4 inline mr-1" />
-                    Código *
+                    Código Interno
                   </label>
                   <input
                     type="text"
-                    value={formData.codigo}
-                    onChange={(e) => handleInputChange('codigo', e.target.value)}
-                    className={cn(
-                      'input-no-zoom w-full px-3 py-2 border rounded-lg transition-colors',
-                      'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-                      errors.codigo 
-                        ? 'border-destructive focus:ring-destructive' 
-                        : 'border-border'
-                    )}
-                    placeholder="Ej: COC001"
+                    value={formData.codigo_interno}
+                    onChange={(e) => handleInputChange('codigo_interno', e.target.value)}
+                    className="input-no-zoom w-full px-3 py-2 border border-border rounded-lg 
+                             focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                    placeholder="Ej: PROD001"
                   />
-                  {errors.codigo && (
-                    <p className="text-destructive text-sm mt-1">{errors.codigo}</p>
-                  )}
                 </div>
 
-                {/* Nombre */}
+                {/* Código de Barras */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    <Type className="h-4 w-4 inline mr-1" />
-                    Nombre *
+                    <Hash className="h-4 w-4 inline mr-1" />
+                    Código de Barras
                   </label>
                   <input
                     type="text"
-                    value={formData.nombre}
-                    onChange={(e) => handleInputChange('nombre', e.target.value)}
-                    className={cn(
-                      'input-no-zoom w-full px-3 py-2 border rounded-lg transition-colors',
-                      'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-                      errors.nombre 
-                        ? 'border-destructive focus:ring-destructive' 
-                        : 'border-border'
-                    )}
-                    placeholder="Ej: Coca-Cola 600ml"
+                    value={formData.codigo_barras}
+                    onChange={(e) => handleInputChange('codigo_barras', e.target.value)}
+                    className="input-no-zoom w-full px-3 py-2 border border-border rounded-lg 
+                             focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                    placeholder="Ej: 123456789012"
                   />
-                  {errors.nombre && (
-                    <p className="text-destructive text-sm mt-1">{errors.nombre}</p>
-                  )}
                 </div>
+
+              </div>
+
+              {/* Nombre */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  <Type className="h-4 w-4 inline mr-1" />
+                  Nombre *
+                </label>
+                <input
+                  type="text"
+                  value={formData.nombre}
+                  onChange={(e) => handleInputChange('nombre', e.target.value)}
+                  className={cn(
+                    'input-no-zoom w-full px-3 py-2 border rounded-lg transition-colors',
+                    'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
+                    errors.nombre 
+                      ? 'border-destructive focus:ring-destructive' 
+                      : 'border-border'
+                  )}
+                  placeholder="Ej: Coca-Cola 600ml"
+                />
+                {errors.nombre && (
+                  <p className="text-destructive text-sm mt-1">{errors.nombre}</p>
+                )}
               </div>
 
               {/* Descripción */}
@@ -229,55 +249,86 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Precio */}
+                {/* Precio de Venta */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Precio (MXN) *
+                    Precio de Venta (MXN) *
                   </label>
                   <input
                     type="number"
                     step="0.01"
                     min="0"
-                    value={formData.precio}
-                    onChange={(e) => handleInputChange('precio', e.target.value)}
+                    value={formData.precio_venta}
+                    onChange={(e) => handleInputChange('precio_venta', e.target.value)}
                     className={cn(
                       'input-no-zoom w-full px-3 py-2 border rounded-lg transition-colors',
                       'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-                      errors.precio 
+                      errors.precio_venta 
                         ? 'border-destructive focus:ring-destructive' 
                         : 'border-border'
                     )}
                     placeholder="0.00"
                   />
-                  {errors.precio && (
-                    <p className="text-destructive text-sm mt-1">{errors.precio}</p>
+                  {errors.precio_venta && (
+                    <p className="text-destructive text-sm mt-1">{errors.precio_venta}</p>
                   )}
                 </div>
 
-                {/* Stock */}
+                {/* Es Paquete */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Stock Inicial *
+                    Tipo de Producto
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="es_paquete"
+                        checked={!formData.es_paquete}
+                        onChange={() => handleInputChange('es_paquete', false)}
+                        className="text-primary"
+                      />
+                      <span>Producto Individual</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="es_paquete"
+                        checked={formData.es_paquete}
+                        onChange={() => handleInputChange('es_paquete', true)}
+                        className="text-primary"
+                      />
+                      <span>Paquete</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cantidad del Paquete - Solo si es paquete */}
+              {formData.es_paquete && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Cantidad en el Paquete
                   </label>
                   <input
                     type="number"
-                    min="0"
-                    value={formData.stock}
-                    onChange={(e) => handleInputChange('stock', e.target.value)}
+                    min="1"
+                    value={formData.cantidad_paquete}
+                    onChange={(e) => handleInputChange('cantidad_paquete', e.target.value)}
                     className={cn(
                       'input-no-zoom w-full px-3 py-2 border rounded-lg transition-colors',
                       'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-                      errors.stock 
+                      errors.cantidad_paquete 
                         ? 'border-destructive focus:ring-destructive' 
                         : 'border-border'
                     )}
-                    placeholder="0"
+                    placeholder="1"
                   />
-                  {errors.stock && (
-                    <p className="text-destructive text-sm mt-1">{errors.stock}</p>
+                  {errors.cantidad_paquete && (
+                    <p className="text-destructive text-sm mt-1">{errors.cantidad_paquete}</p>
                   )}
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Category and Image */}
@@ -292,19 +343,26 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
                 <label className="block text-sm font-medium text-foreground mb-2">
                   Categoría
                 </label>
-                <select
-                  value={formData.categoria_id}
-                  onChange={(e) => handleInputChange('categoria_id', e.target.value)}
-                  className="input-no-zoom w-full px-3 py-2 border border-border rounded-lg 
-                           focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                >
-                  <option value="">Sin categoría</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.nombre}
-                    </option>
-                  ))}
-                </select>
+                {loadingCategories ? (
+                  <div className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Cargando categorías...</span>
+                  </div>
+                ) : (
+                  <select
+                    value={formData.categoria_id}
+                    onChange={(e) => handleInputChange('categoria_id', e.target.value)}
+                    className="input-no-zoom w-full px-3 py-2 border border-border rounded-lg 
+                             focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                  >
+                    <option value="">Sin categoría</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.nombre}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {/* URL de Imagen */}

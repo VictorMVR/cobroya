@@ -69,7 +69,7 @@ export function ProductCard({ producto, viewMode, onEdit, onDelete }: ProductCar
 
             <div className="text-right ml-4">
               <div className="text-lg font-bold text-primary">
-                {formatCurrency(producto.precio)}
+                {formatCurrency(producto.precio_venta)}
               </div>
               
               <div className={cn(
@@ -196,7 +196,7 @@ export function ProductCard({ producto, viewMode, onEdit, onDelete }: ProductCar
 
           <div className="flex items-center justify-between pt-2">
             <div className="text-lg font-bold text-primary">
-              {formatCurrency(producto.precio)}
+              {formatCurrency(producto.precio_venta)}
             </div>
             
             <div className={cn(
