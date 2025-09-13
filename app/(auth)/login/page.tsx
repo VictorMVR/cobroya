@@ -4,6 +4,40 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
+import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
+
+// Smart redirect function based on user role
+async function redirectUserBasedOnRole(user: User, router: AppRouterInstance) {
+  const metadata = user.user_metadata || {}
+  const isSuperAdmin = user.email === 'verdugorubio@gmail.com'
+  const rol = metadata.rol
+  const hasTenant = metadata.tenant_id
+
+  // Super admin always goes to super admin dashboard
+  if (isSuperAdmin) {
+    router.push('/super-admin')
+    return
+  }
+
+  // If user has role and tenant, redirect based on role
+  if (rol && hasTenant) {
+    switch (rol) {
+      case 'ADMIN':
+        router.push('/admin')
+        break
+      case 'CAJERO':
+        router.push('/pos')
+        break
+      default:
+        router.push('/admin')
+    }
+    return
+  }
+
+  // New user or incomplete setup - go to onboarding
+  router.push('/onboarding')
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -31,7 +65,8 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        router.push('/pos')
+        // Smart redirect based on user role
+        await redirectUserBasedOnRole(data.user, router)
       }
     } catch (error) {
       console.error('Login error:', error)
@@ -49,7 +84,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/pos`
+          redirectTo: `${window.location.origin}/auth/callback`
         }
       })
 

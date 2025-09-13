@@ -1,216 +1,226 @@
 'use client'
 
+import { useUser } from '@/lib/hooks/useUser'
+import Link from 'next/link'
 import { 
-  DollarSign, 
-  ShoppingCart, 
+  BarChart3, 
+  Package, 
   Users, 
-  Package,
+  ShoppingCart, 
+  CreditCard, 
+  Settings,
+  Store,
   TrendingUp,
   Calendar,
-  Clock,
-  Receipt
+  UserPlus
 } from 'lucide-react'
-import Link from 'next/link'
-
-interface MetricCardProps {
-  title: string
-  value: string
-  change: string
-  changeType: 'positive' | 'negative' | 'neutral'
-  icon: React.ComponentType<{ className?: string }>
-}
-
-function MetricCard({ title, value, change, changeType, icon: Icon }: MetricCardProps) {
-  return (
-    <div className="card-mobile p-4 tap-feedback hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold">{value}</p>
-          <p className={`text-sm ${
-            changeType === 'positive' ? 'text-success' : 
-            changeType === 'negative' ? 'text-destructive' : 
-            'text-muted-foreground'
-          }`}>
-            {change}
-          </p>
-        </div>
-        <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
-          <Icon className="h-6 w-6 text-primary" />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-interface QuickActionProps {
-  title: string
-  description: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  color: 'primary' | 'success' | 'warning' | 'secondary'
-}
-
-function QuickAction({ title, description, href, icon: Icon, color }: QuickActionProps) {
-  const colorClasses = {
-    primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
-    success: 'bg-success text-success-foreground hover:bg-success/90',
-    warning: 'bg-warning text-warning-foreground hover:bg-warning/90',
-    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
-  }
-
-  return (
-    <Link href={href}>
-      <div className="card-mobile p-4 tap-feedback hover:shadow-md transition-all group">
-        <div className="flex items-center gap-4">
-          <div className={`h-12 w-12 rounded-full flex items-center justify-center ${colorClasses[color]} 
-                         group-hover:scale-110 transition-transform`}>
-            <Icon className="h-6 w-6" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-medium">{title}</h3>
-            <p className="text-sm text-muted-foreground">{description}</p>
-          </div>
-        </div>
-      </div>
-    </Link>
-  )
-}
 
 export default function AdminDashboard() {
-  const today = new Date().toLocaleDateString('es-MX', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
+  const { user, loading, signOut } = useUser()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null // Middleware should redirect
+  }
+
+  const quickActions = [
+    { 
+      title: 'Punto de Venta', 
+      description: 'Realizar ventas',
+      icon: ShoppingCart,
+      href: '/pos',
+      color: 'bg-green-500 hover:bg-green-600'
+    },
+    { 
+      title: 'Productos', 
+      description: 'Gestionar inventario',
+      icon: Package,
+      href: '/productos',
+      color: 'bg-blue-500 hover:bg-blue-600'
+    },
+    { 
+      title: 'Clientes', 
+      description: 'Base de clientes',
+      icon: Users,
+      href: '/clientes',
+      color: 'bg-purple-500 hover:bg-purple-600'
+    },
+    { 
+      title: 'Cuentas Pendientes', 
+      description: 'Créditos y pagos',
+      icon: CreditCard,
+      href: '/cuentas',
+      color: 'bg-orange-500 hover:bg-orange-600'
+    }
+  ]
+
+  const stats = [
+    { title: 'Ventas de Hoy', value: '$0', icon: TrendingUp, color: 'text-green-600' },
+    { title: 'Productos', value: '0', icon: Package, color: 'text-blue-600' },
+    { title: 'Clientes', value: '0', icon: Users, color: 'text-purple-600' },
+    { title: 'Cuentas Pendientes', value: '$0', icon: CreditCard, color: 'text-orange-600' }
+  ]
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Calendar className="h-4 w-4" />
-          <span className="capitalize">{today}</span>
-        </div>
-      </div>
-
-      {/* Key Metrics */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Resumen del Día</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard
-            title="Ventas Hoy"
-            value="$2,450"
-            change="+12% vs ayer"
-            changeType="positive"
-            icon={DollarSign}
-          />
-          <MetricCard
-            title="Transacciones"
-            value="48"
-            change="+8% vs ayer"
-            changeType="positive"
-            icon={ShoppingCart}
-          />
-          <MetricCard
-            title="Clientes"
-            value="32"
-            change="+5% vs ayer"
-            changeType="positive"
-            icon={Users}
-          />
-          <MetricCard
-            title="Productos"
-            value="156"
-            change="2 con stock bajo"
-            changeType="neutral"
-            icon={Package}
-          />
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Acciones Rápidas</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <QuickAction
-            title="Nueva Venta"
-            description="Abrir punto de venta"
-            href="/pos"
-            icon={ShoppingCart}
-            color="success"
-          />
-          <QuickAction
-            title="Ver Cuentas"
-            description="3 cuentas abiertas"
-            href="/cuentas"
-            icon={Receipt}
-            color="warning"
-          />
-          <QuickAction
-            title="Productos"
-            description="Gestionar inventario"
-            href="/productos"
-            icon={Package}
-            color="primary"
-          />
-          <QuickAction
-            title="Reportes"
-            description="Ver estadísticas"
-            href="/reportes"
-            icon={TrendingUp}
-            color="secondary"
-          />
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Actividad Reciente</h2>
-        <div className="card-mobile">
-          <div className="p-4 space-y-4">
-            {[
-              { time: '14:32', action: 'Venta completada', amount: '$125.50', customer: 'Cliente General' },
-              { time: '14:15', action: 'Producto agregado', amount: '', customer: 'Coca Cola 600ml' },
-              { time: '13:58', action: 'Venta completada', amount: '$89.00', customer: 'María González' },
-              { time: '13:45', action: 'Cuenta abierta', amount: '$234.00', customer: 'Juan Pérez' },
-            ].map((activity, index) => (
-              <div key={index} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 bg-secondary rounded-full flex items-center justify-center">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{activity.action}</p>
-                    <p className="text-sm text-muted-foreground">{activity.customer}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">{activity.time}</p>
-                  {activity.amount && (
-                    <p className="font-medium text-success">{activity.amount}</p>
-                  )}
-                </div>
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <Store className="h-8 w-8 text-blue-600" />
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900">CobroYa Admin</h1>
+                <p className="text-sm text-gray-500">Panel de Control</p>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Performance Chart Placeholder */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Ventas de la Semana</h2>
-        <div className="card-mobile p-6">
-          <div className="h-48 bg-secondary/20 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-              <p className="text-muted-foreground">Gráfico de ventas próximamente</p>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">{user.nombre_completo}</p>
+                <p className="text-xs text-gray-500">{user.rol}</p>
+              </div>
+              <button
+                onClick={signOut}
+                className="text-gray-400 hover:text-gray-600 text-sm"
+              >
+                Salir
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Message */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            ¡Hola, {user.nombre_completo?.split(' ')[0]}! 👋
+          </h2>
+          <p className="text-gray-600">
+            Bienvenido a tu panel de administración. Aquí puedes gestionar todo tu negocio.
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => {
+            const IconComponent = stat.icon
+            return (
+              <div key={index} className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                  </div>
+                  <IconComponent className={`h-8 w-8 ${stat.color}`} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {quickActions.map((action, index) => {
+              const IconComponent = action.icon
+              return (
+                <Link
+                  key={index}
+                  href={action.href}
+                  className={`${action.color} text-white p-6 rounded-lg hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <IconComponent className="h-6 w-6" />
+                    <div>
+                      <h4 className="font-semibold">{action.title}</h4>
+                      <p className="text-sm opacity-90">{action.description}</p>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Management Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Business Management */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <Settings className="h-5 w-5 mr-2 text-gray-600" />
+              Gestión del Negocio
+            </h3>
+            <div className="space-y-3">
+              <Link href="/categorias" className="block p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-gray-900">Categorías</h4>
+                    <p className="text-sm text-gray-600">Organizar productos</p>
+                  </div>
+                  <Package className="h-5 w-5 text-gray-400" />
+                </div>
+              </Link>
+              
+              <div className="block p-3 rounded-lg bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-gray-500">Configuración</h4>
+                    <p className="text-sm text-gray-400">Próximamente</p>
+                  </div>
+                  <Settings className="h-5 w-5 text-gray-300" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Team Management */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <UserPlus className="h-5 w-5 mr-2 text-gray-600" />
+              Equipo de Trabajo
+            </h3>
+            <div className="space-y-3">
+              <div className="p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-600">Plan Gratuito</span>
+                  <span className="text-sm text-green-600">Activo</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mb-1">1 / 2</div>
+                <p className="text-sm text-gray-600">Usuarios utilizados</p>
+              </div>
+              
+              <button 
+                disabled
+                className="w-full p-3 border-2 border-dashed border-gray-200 rounded-lg text-gray-400 hover:border-gray-300 transition-colors disabled:cursor-not-allowed"
+              >
+                <UserPlus className="h-5 w-5 mx-auto mb-1" />
+                <span className="text-sm">Invitar Cajero (Próximamente)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Getting Started */}
+        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">🚀 Primeros Pasos</h3>
+          <p className="text-blue-800 mb-4">Para empezar a usar CobroYa, te recomendamos:</p>
+          <ol className="list-decimal list-inside space-y-2 text-blue-800">
+            <li>Agregar tus primeros productos en <Link href="/productos" className="underline font-medium">Productos</Link></li>
+            <li>Configurar categorías en <Link href="/categorias" className="underline font-medium">Categorías</Link></li>
+            <li>Realizar tu primera venta en <Link href="/pos" className="underline font-medium">Punto de Venta</Link></li>
+          </ol>
+        </div>
+      </main>
     </div>
   )
 }
