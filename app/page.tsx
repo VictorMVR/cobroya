@@ -54,11 +54,11 @@ export default function LandingPage() {
                 <a href="#pricing" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition">
                   Precios
                 </a>
-                <Link href="/login" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition">
-                  Iniciar Sesión
-                </Link>
                 <Link href="/pos" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
                   Probar Gratis
+                </Link>
+                <Link href="/login" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition">
+                  Iniciar Sesión
                 </Link>
               </div>
             </div>
@@ -82,11 +82,11 @@ export default function LandingPage() {
               <a href="#features" className="block px-3 py-2 text-gray-600 hover:text-blue-600">Características</a>
               <a href="#business" className="block px-3 py-2 text-gray-600 hover:text-blue-600">Negocios</a>
               <a href="#pricing" className="block px-3 py-2 text-gray-600 hover:text-blue-600">Precios</a>
-              <Link href="/login" className="block px-3 py-2 text-gray-600 hover:text-blue-600 border border-gray-300 rounded-lg font-medium mb-2">
-                Iniciar Sesión
-              </Link>
-              <Link href="/pos" className="block px-3 py-2 bg-blue-600 text-white rounded-lg font-medium">
+              <Link href="/pos" className="block px-3 py-2 bg-blue-600 text-white rounded-lg font-medium mb-2">
                 Probar Gratis
+              </Link>
+              <Link href="/login" className="block px-3 py-2 text-gray-600 hover:text-blue-600 border border-gray-300 rounded-lg font-medium">
+                Iniciar Sesión
               </Link>
             </div>
           </div>
