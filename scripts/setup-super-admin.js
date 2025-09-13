@@ -19,6 +19,11 @@ async function setupSuperAdmin() {
     }
     
     const superAdminEmail = 'verdugorubio@gmail.com'
+    console.log('📋 Users found:', users.users.length)
+    console.log('📧 Looking for:', superAdminEmail)
+    users.users.forEach((user, index) => {
+      console.log(`👤 User ${index + 1}: ${user.email}`)
+    })
     const existingUser = users.users.find(user => user.email === superAdminEmail)
     
     if (existingUser) {
