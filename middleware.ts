@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   const pathname = url.pathname
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/login', '/auth/callback', '/api/auth/callback']
+  const publicRoutes = ['/', '/login']
 
   // Skip middleware for API routes entirely
   if (pathname.startsWith('/api/')) {

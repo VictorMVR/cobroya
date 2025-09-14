@@ -5,15 +5,22 @@ import { createSafeServerClient } from '@/lib/supabase/server-safe'
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const error_description = requestUrl.searchParams.get('error_description')
 
   console.log('🔐 /api/auth/callback called with code:', code ? 'present' : 'missing')
   console.log('🌐 Request URL:', requestUrl.toString())
+
+  // Check for OAuth errors first
+  if (error_description) {
+    console.error('❌ OAuth error:', error_description)
+    return NextResponse.redirect(`${requestUrl.origin}/login?error=${encodeURIComponent(error_description)}`)
+  }
 
   if (code) {
     try {
       console.log('🔑 Creating safe server client...')
       const supabase = await createSafeServerClient()
-    
+
       // Try to exchange code for session
       console.log('📡 Attempting to exchange code for session...')
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
@@ -54,7 +61,8 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        return NextResponse.redirect(`${requestUrl.origin}/?auth_success=true`)
+        console.log(`🎯 Redirecting user to: ${redirectPath}`)
+        return NextResponse.redirect(`${requestUrl.origin}${redirectPath}`)
       }
     } catch (error) {
       console.error('❌ Unexpected auth error:', error)

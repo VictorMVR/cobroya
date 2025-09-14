@@ -7,6 +7,14 @@ export function createClient() {
 
   return createBrowserClient<Database>(
     url,
-    anonKey
+    anonKey,
+    {
+      auth: {
+        flowType: 'pkce',
+        detectSessionInUrl: true,
+        persistSession: true,
+        autoRefreshToken: true
+      }
+    }
   )
 }
