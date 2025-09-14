@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { 
   Smartphone, 
@@ -29,6 +30,17 @@ import {
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Handle OAuth callback if code arrives here
+  useEffect(() => {
+    const code = searchParams.get('code')
+    if (code) {
+      // Redirect to auth callback with the code
+      router.push(`/api/auth/callback?code=${code}`)
+    }
+  }, [searchParams, router])
 
   return (
     <div className="min-h-screen bg-white">

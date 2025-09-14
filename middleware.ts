@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
   const pathname = url.pathname
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/login', '/auth/callback']
+  const publicRoutes = ['/', '/login', '/auth/callback', '/api/auth/callback']
   
   // Routes that require specific roles
   const adminRoutes = ['/admin', '/productos', '/clientes', '/cuentas', '/categorias']
