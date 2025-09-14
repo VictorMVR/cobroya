@@ -1,9 +1,12 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { Database } from '@/types/supabase'
+import { validateSupabaseEnv } from './validate-env'
 
 export function createClient() {
+  const { url, anonKey } = validateSupabaseEnv()
+
   return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    url,
+    anonKey
   )
 }
