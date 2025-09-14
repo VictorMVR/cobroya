@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
@@ -46,7 +46,22 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
+
+  // Check for auth errors in URL parameters
+  useEffect(() => {
+    const urlError = searchParams.get('error')
+    const errorDetails = searchParams.get('details')
+    
+    if (urlError === 'auth_error') {
+      const message = errorDetails 
+        ? `Error de autenticación: ${decodeURIComponent(errorDetails)}`
+        : 'Error de autenticación. Por favor, inténtalo de nuevo.'
+      setError(message)
+      console.error('Auth error from callback:', { urlError, errorDetails })
+    }
+  }, [searchParams])
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()

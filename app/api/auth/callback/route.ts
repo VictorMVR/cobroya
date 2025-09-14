@@ -7,6 +7,9 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
 
+  console.log('🔐 Auth callback called with code:', code ? 'present' : 'missing')
+  console.log('🌐 Request URL:', requestUrl.toString())
+
   if (code) {
     const cookieStore = await cookies()
     const supabase = createServerClient(
@@ -28,12 +31,20 @@ export async function GET(request: NextRequest) {
     )
     
     try {
+      console.log('📡 Attempting to exchange code for session...')
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
       
       if (error) {
-        console.error('Auth callback error:', error)
-        return NextResponse.redirect(`${requestUrl.origin}/login?error=auth_error`)
+        console.error('❌ Auth callback error details:', {
+          message: error.message,
+          status: error.status,
+          statusCode: error.status,
+          name: error.name
+        })
+        return NextResponse.redirect(`${requestUrl.origin}/login?error=auth_error&details=${encodeURIComponent(error.message)}`)
       }
+
+      console.log('✅ Session exchange successful, user:', data.user?.email)
 
       if (data.user) {
         const metadata = data.user.user_metadata || {}
