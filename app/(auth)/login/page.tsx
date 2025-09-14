@@ -124,7 +124,7 @@ export default function LoginPage() {
       
       // Ensure we use the correct redirect URL that's configured in Supabase
       // This handles both cobroya.mx and www.cobroya.mx cases
-      const redirectTo = `${origin}/auth/callback`
+      const redirectTo = `${origin}/api/auth/callback`
       
       console.log('OAuth redirect URL:', redirectTo) // For debugging
       
