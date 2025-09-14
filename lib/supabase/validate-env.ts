@@ -25,10 +25,6 @@ export function validateSupabaseEnv() {
     .replace(/\s/g, '')           // Remove spaces
     .trim()
   
-  console.log('🔧 Original key length:', supabaseAnonKey.length)
-  console.log('🔧 Cleaned key length:', cleanAnonKey.length)
-  console.log('🔧 Key preview:', cleanAnonKey.substring(0, 50) + '...')
-  
   return {
     url: supabaseUrl,
     anonKey: cleanAnonKey
