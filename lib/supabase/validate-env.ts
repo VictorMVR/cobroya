@@ -18,8 +18,16 @@ export function validateSupabaseEnv() {
     throw new Error('Invalid Supabase anon key format')
   }
   
-  // Clean any potential whitespace or newlines
-  const cleanAnonKey = supabaseAnonKey.replace(/[\r\n\t]/g, '').trim()
+  // Clean any potential whitespace, newlines, and invisible characters  
+  // JWT can contain: alphanumeric, dots, hyphens, underscores, plus, forward slash
+  const cleanAnonKey = supabaseAnonKey
+    .replace(/[\r\n\t]/g, '')     // Remove newlines and tabs
+    .replace(/\s/g, '')           // Remove spaces
+    .trim()
+  
+  console.log('🔧 Original key length:', supabaseAnonKey.length)
+  console.log('🔧 Cleaned key length:', cleanAnonKey.length)
+  console.log('🔧 Key preview:', cleanAnonKey.substring(0, 50) + '...')
   
   return {
     url: supabaseUrl,

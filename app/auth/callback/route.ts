@@ -1,8 +1,6 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { validateSupabaseEnv } from '@/lib/supabase/validate-env'
+import { createSafeServerClient } from '@/lib/supabase/server-safe'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -12,29 +10,9 @@ export async function GET(request: NextRequest) {
   console.log('🌐 Request URL:', requestUrl.toString())
 
   if (code) {
-    const cookieStore = await cookies()
-    
     try {
-      // Validate and clean environment variables
-      const { url, anonKey } = validateSupabaseEnv()
-      
-      console.log('🔑 Using validated Supabase config')
-      console.log('🔑 URL:', url)
-      console.log('🔑 Key length:', anonKey.length)
-      
-      const supabase = createServerClient(url, anonKey, {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options })
-          },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options })
-          },
-        },
-      })
+      console.log('🔑 Creating safe server client...')
+      const supabase = await createSafeServerClient()
     
       // Try to exchange code for session
       console.log('📡 Attempting to exchange code for session...')
