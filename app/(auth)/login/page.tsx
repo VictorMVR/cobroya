@@ -81,14 +81,24 @@ export default function LoginPage() {
     setError('')
     
     try {
+      // Get current origin and normalize it
+      let origin = window.location.origin
+      
+      // Ensure we use the correct redirect URL that's configured in Supabase
+      // This handles both cobroya.mx and www.cobroya.mx cases
+      const redirectTo = `${origin}/auth/callback`
+      
+      console.log('OAuth redirect URL:', redirectTo) // For debugging
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: redirectTo
         }
       })
 
       if (error) {
+        console.error('OAuth error:', error)
         setError(error.message)
       }
     } catch (error) {

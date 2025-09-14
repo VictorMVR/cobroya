@@ -33,12 +33,19 @@ export default function LandingPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Handle OAuth callback if code arrives here
+  // Handle OAuth callback if code arrives here instead of /auth/callback
   useEffect(() => {
     const code = searchParams.get('code')
+    const error = searchParams.get('error')
+    
     if (code) {
-      // Redirect to auth callback with the code
+      console.log('OAuth code detected on landing page, redirecting to callback...')
+      // Redirect to auth callback with the code to process authentication
       router.push(`/api/auth/callback?code=${code}`)
+    } else if (error) {
+      console.error('OAuth error detected:', error)
+      // Redirect to login with error
+      router.push(`/login?error=${error}`)
     }
   }, [searchParams, router])
 
