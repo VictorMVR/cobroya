@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { validateSupabaseEnv } from '@/lib/supabase/validate-env'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -12,10 +13,16 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
+    
+    try {
+      // Validate and clean environment variables
+      const { url, anonKey } = validateSupabaseEnv()
+      
+      console.log('🔑 Using validated Supabase config')
+      console.log('🔑 URL:', url)
+      console.log('🔑 Key length:', anonKey.length)
+      
+      const supabase = createServerClient(url, anonKey, {
         cookies: {
           get(name: string) {
             return cookieStore.get(name)?.value
@@ -27,10 +34,9 @@ export async function GET(request: NextRequest) {
             cookieStore.set({ name, value: '', ...options })
           },
         },
-      }
-    )
+      })
     
-    try {
+      // Try to exchange code for session
       console.log('📡 Attempting to exchange code for session...')
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
       
@@ -72,8 +78,11 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.redirect(`${requestUrl.origin}${redirectPath}`)
       }
+    } catch (configError) {
+      console.error('❌ Supabase config error:', configError)
+      return NextResponse.redirect(`${requestUrl.origin}/login?error=config_error`)
     } catch (error) {
-      console.error('Unexpected auth error:', error)
+      console.error('❌ Unexpected auth error:', error)
       return NextResponse.redirect(`${requestUrl.origin}/login?error=unexpected_error`)
     }
   }
