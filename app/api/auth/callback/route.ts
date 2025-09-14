@@ -23,9 +23,7 @@ export async function GET(request: NextRequest) {
       const cookieStore = await cookies()
       const { url, anonKey } = validateSupabaseEnv()
 
-      // Create a response object first to properly set cookies
-      const response = NextResponse.redirect(`${requestUrl.origin}/`)
-
+      // First, create a temporary supabase client to exchange the code
       const supabase = createServerClient(url, anonKey, {
         cookies: {
           get(name: string) {
@@ -33,11 +31,9 @@ export async function GET(request: NextRequest) {
           },
           set(name: string, value: string, options: any) {
             cookieStore.set({ name, value, ...options })
-            response.cookies.set({ name, value, ...options })
           },
           remove(name: string, options: any) {
             cookieStore.set({ name, value: '', ...options })
-            response.cookies.set({ name, value: '', ...options })
           },
         },
       })
@@ -45,7 +41,7 @@ export async function GET(request: NextRequest) {
       // Try to exchange code for session
       console.log('📡 Attempting to exchange code for session...')
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-      
+
       if (error) {
         console.error('❌ Auth callback error details:', {
           message: error.message,
@@ -83,8 +79,19 @@ export async function GET(request: NextRequest) {
         }
 
         console.log(`🎯 Redirecting user to: ${redirectPath}`)
-        // Update the response redirect URL
-        return NextResponse.redirect(`${requestUrl.origin}${redirectPath}`)
+
+        // NOW create the response with the correct redirect path
+        const response = NextResponse.redirect(`${requestUrl.origin}${redirectPath}`)
+
+        // Copy over the auth cookies to the response
+        const authCookies = cookieStore.getAll()
+        authCookies.forEach(cookie => {
+          if (cookie.name.includes('supabase')) {
+            response.cookies.set(cookie)
+          }
+        })
+
+        return response
       }
 
       // If we get here but no user, still redirect to login
