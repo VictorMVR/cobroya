@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        return NextResponse.redirect(`${requestUrl.origin}${redirectPath}`)
+        return NextResponse.redirect(`${requestUrl.origin}/?auth_success=true`)
       }
     } catch (error) {
       console.error('❌ Unexpected auth error:', error)
