@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
+import LoginErrorHandler from '@/components/auth/LoginErrorHandler'
 
 // Smart redirect function based on user role
 async function redirectUserBasedOnRole(user: User, router: AppRouterInstance) {
@@ -46,24 +47,10 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
-  const searchParams = useSearchParams()
   const supabase = createClient()
 
   // Check for auth errors in URL parameters AND handle OAuth success tokens
   useEffect(() => {
-    // Check for URL parameters (query string)
-    const urlError = searchParams.get('error')
-    const errorDetails = searchParams.get('details')
-    
-    if (urlError === 'auth_error') {
-      const message = errorDetails 
-        ? `Error de autenticación: ${decodeURIComponent(errorDetails)}`
-        : 'Error de autenticación. Por favor, inténtalo de nuevo.'
-      setError(message)
-      console.error('Auth error from callback:', { urlError, errorDetails })
-      return
-    }
-
     // Check for OAuth success tokens in hash fragment
     const hash = window.location.hash
     if (hash && hash.includes('access_token=')) {
@@ -97,7 +84,7 @@ export default function LoginPage() {
         })
       }
     }
-  }, [searchParams, router, supabase])
+  }, [router, supabase])
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -162,6 +149,9 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
+      <Suspense>
+        <LoginErrorHandler setError={setError} />
+      </Suspense>
       <div className="w-full max-w-sm space-y-8">
         {/* Logo and branding */}
         <div className="text-center">

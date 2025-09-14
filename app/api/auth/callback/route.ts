@@ -56,9 +56,6 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.redirect(`${requestUrl.origin}${redirectPath}`)
       }
-    } catch (configError) {
-      console.error('❌ Supabase config error:', configError)
-      return NextResponse.redirect(`${requestUrl.origin}/login?error=config_error`)
     } catch (error) {
       console.error('❌ Unexpected auth error:', error)
       return NextResponse.redirect(`${requestUrl.origin}/login?error=unexpected_error`)

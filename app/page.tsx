@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { 
   Smartphone, 
@@ -27,30 +27,17 @@ import {
   TrendingUp,
   Shield
 } from 'lucide-react'
+import OauthHandler from '@/components/auth/OauthHandler'
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const router = useRouter()
-  const searchParams = useSearchParams()
-
-  // Handle OAuth callback if code arrives here instead of /auth/callback
-  useEffect(() => {
-    const code = searchParams.get('code')
-    const error = searchParams.get('error')
-    
-    if (code) {
-      console.log('OAuth code detected on landing page, redirecting to callback...')
-      // Redirect to auth callback with the code to process authentication
-      router.push(`/api/auth/callback?code=${code}`)
-    } else if (error) {
-      console.error('OAuth error detected:', error)
-      // Redirect to login with error
-      router.push(`/login?error=${error}`)
-    }
-  }, [searchParams, router])
 
   return (
     <div className="min-h-screen bg-white">
+      <Suspense>
+        <OauthHandler />
+      </Suspense>
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
