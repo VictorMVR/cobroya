@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { createSafeServerClient } from '@/lib/supabase/server-safe'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { validateSupabaseEnv } from '@/lib/supabase/validate-env'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -18,8 +20,27 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     try {
-      console.log('🔑 Creating safe server client...')
-      const supabase = await createSafeServerClient()
+      const cookieStore = await cookies()
+      const { url, anonKey } = validateSupabaseEnv()
+
+      // Create a response object first to properly set cookies
+      const response = NextResponse.redirect(`${requestUrl.origin}/`)
+
+      const supabase = createServerClient(url, anonKey, {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+          set(name: string, value: string, options: any) {
+            cookieStore.set({ name, value, ...options })
+            response.cookies.set({ name, value, ...options })
+          },
+          remove(name: string, options: any) {
+            cookieStore.set({ name, value: '', ...options })
+            response.cookies.set({ name, value: '', ...options })
+          },
+        },
+      })
 
       // Try to exchange code for session
       console.log('📡 Attempting to exchange code for session...')
@@ -62,8 +83,12 @@ export async function GET(request: NextRequest) {
         }
 
         console.log(`🎯 Redirecting user to: ${redirectPath}`)
+        // Update the response redirect URL
         return NextResponse.redirect(`${requestUrl.origin}${redirectPath}`)
       }
+
+      // If we get here but no user, still redirect to login
+      return NextResponse.redirect(`${requestUrl.origin}/login`)
     } catch (error) {
       console.error('❌ Unexpected auth error:', error)
       return NextResponse.redirect(`${requestUrl.origin}/login?error=unexpected_error`)

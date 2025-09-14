@@ -49,41 +49,14 @@ export default function LoginPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  // Check for auth errors in URL parameters AND handle OAuth success tokens
+  // Check if user is already logged in
   useEffect(() => {
-    // Check for OAuth success tokens in hash fragment
-    const hash = window.location.hash
-    if (hash && hash.includes('access_token=')) {
-      console.log('✅ OAuth success! Processing tokens...')
-      
-      // Parse hash parameters
-      const hashParams = new URLSearchParams(hash.substring(1))
-      const accessToken = hashParams.get('access_token')
-      const refreshToken = hashParams.get('refresh_token')
-      
-      if (accessToken) {
-        console.log('🔑 Access token found, setting session...')
-        
-        // Set the session with the tokens
-        supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken || ''
-        }).then(({ data, error }) => {
-          if (error) {
-            console.error('❌ Error setting session:', error)
-            setError('Error configurando la sesión')
-          } else if (data.user) {
-            console.log('✅ Session set successfully, user:', data.user.email)
-            
-            // Clear hash from URL
-            window.history.replaceState({}, document.title, window.location.pathname)
-            
-            // Redirect based on user role
-            redirectUserBasedOnRole(data.user, router)
-          }
-        })
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        console.log('User already logged in, redirecting...')
+        redirectUserBasedOnRole(user, router)
       }
-    }
+    })
   }, [router, supabase])
 
   const handleEmailLogin = async (e: React.FormEvent) => {

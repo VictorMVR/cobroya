@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { 
-  Smartphone, 
-  ShoppingCart, 
-  CreditCard, 
-  Camera, 
-  FileText, 
+import {
+  Smartphone,
+  ShoppingCart,
+  CreditCard,
+  Camera,
+  FileText,
   Headphones,
   BarChart3,
   Cloud,
@@ -27,7 +27,6 @@ import {
   TrendingUp,
   Shield
 } from 'lucide-react'
-import OauthHandler from '@/components/auth/OauthHandler'
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -35,9 +34,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Suspense>
-        <OauthHandler />
-      </Suspense>
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
