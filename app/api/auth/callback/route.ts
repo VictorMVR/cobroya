@@ -1,49 +1,20 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { createSafeServerClient } from '@/lib/supabase/server-safe'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
 
-  console.log('🔐 Auth callback called with code:', code ? 'present' : 'missing')
+  console.log('🔐 /api/auth/callback called with code:', code ? 'present' : 'missing')
   console.log('🌐 Request URL:', requestUrl.toString())
 
   if (code) {
-    const cookieStore = await cookies()
-    
-    // Clean and validate environment variables
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
-    
-    if (!supabaseUrl || !supabaseAnonKey) {
-      console.error('❌ Missing Supabase environment variables')
-      return NextResponse.redirect(`${requestUrl.origin}/login?error=config_error`)
-    }
-    
-    console.log('🔑 API Supabase URL length:', supabaseUrl.length)
-    console.log('🔑 API Anon key length:', supabaseAnonKey.length)
-    
-    const supabase = createServerClient(
-      supabaseUrl,
-      supabaseAnonKey,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options })
-          },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options })
-          },
-        },
-      }
-    )
-    
     try {
+      console.log('🔑 Creating safe server client...')
+      const supabase = await createSafeServerClient()
+    
+      // Try to exchange code for session
       console.log('📡 Attempting to exchange code for session...')
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
       
@@ -85,8 +56,11 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.redirect(`${requestUrl.origin}${redirectPath}`)
       }
+    } catch (configError) {
+      console.error('❌ Supabase config error:', configError)
+      return NextResponse.redirect(`${requestUrl.origin}/login?error=config_error`)
     } catch (error) {
-      console.error('Unexpected auth error:', error)
+      console.error('❌ Unexpected auth error:', error)
       return NextResponse.redirect(`${requestUrl.origin}/login?error=unexpected_error`)
     }
   }

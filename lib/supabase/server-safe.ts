@@ -1,12 +1,12 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { validateSupabaseEnv } from './validate-env'
 
 // Safe server client that handles large tokens via cookies instead of headers
 export async function createSafeServerClient() {
   const cookieStore = await cookies()
   
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  const { url, anonKey } = validateSupabaseEnv()
   
   console.log('🔧 Creating server client with cookie-based auth')
   
