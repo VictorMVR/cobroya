@@ -49,8 +49,9 @@ export default function LoginPage() {
   const searchParams = useSearchParams()
   const supabase = createClient()
 
-  // Check for auth errors in URL parameters
+  // Check for auth errors in URL parameters AND handle OAuth success tokens
   useEffect(() => {
+    // Check for URL parameters (query string)
     const urlError = searchParams.get('error')
     const errorDetails = searchParams.get('details')
     
@@ -60,8 +61,43 @@ export default function LoginPage() {
         : 'Error de autenticación. Por favor, inténtalo de nuevo.'
       setError(message)
       console.error('Auth error from callback:', { urlError, errorDetails })
+      return
     }
-  }, [searchParams])
+
+    // Check for OAuth success tokens in hash fragment
+    const hash = window.location.hash
+    if (hash && hash.includes('access_token=')) {
+      console.log('✅ OAuth success! Processing tokens...')
+      
+      // Parse hash parameters
+      const hashParams = new URLSearchParams(hash.substring(1))
+      const accessToken = hashParams.get('access_token')
+      const refreshToken = hashParams.get('refresh_token')
+      
+      if (accessToken) {
+        console.log('🔑 Access token found, setting session...')
+        
+        // Set the session with the tokens
+        supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken || ''
+        }).then(({ data, error }) => {
+          if (error) {
+            console.error('❌ Error setting session:', error)
+            setError('Error configurando la sesión')
+          } else if (data.user) {
+            console.log('✅ Session set successfully, user:', data.user.email)
+            
+            // Clear hash from URL
+            window.history.replaceState({}, document.title, window.location.pathname)
+            
+            // Redirect based on user role
+            redirectUserBasedOnRole(data.user, router)
+          }
+        })
+      }
+    }
+  }, [searchParams, router, supabase])
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
